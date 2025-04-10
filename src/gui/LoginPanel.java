@@ -1,15 +1,16 @@
 package gui;
 
-import logic.App;
-import logic.Auth;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
+import logic.App;
+import logic.Auth;
+
 public class LoginPanel extends JPanel {
 
     public LoginPanel() {
+
         setLayout(new BorderLayout());
 
         JPanel centerPanel = new JPanel(new GridBagLayout());
@@ -36,6 +37,7 @@ public class LoginPanel extends JPanel {
         centerPanel.add(Box.createVerticalGlue(), gbc);
 
         add(centerPanel, BorderLayout.CENTER);
+
     }
 
 

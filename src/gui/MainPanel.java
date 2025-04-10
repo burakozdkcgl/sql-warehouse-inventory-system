@@ -6,6 +6,8 @@ import model.User;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class MainPanel extends JPanel {
 
@@ -49,6 +51,13 @@ public class MainPanel extends JPanel {
             menuButton.setAlignmentX(Component.CENTER_ALIGNMENT);
             menuPanel.add(menuButton);
             menuPanel.add(Box.createVerticalStrut(10));
+            menuButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    // Access the App singleton instance and toggle fullscreen
+                    App.getInstance().toggleFullscreen();
+                }
+            });
         }
 
         whiteBox.add(menuPanel, BorderLayout.WEST);
