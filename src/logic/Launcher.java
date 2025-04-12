@@ -5,21 +5,27 @@ import db.Database;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
-import java.sql.SQLException;
-import java.io.*;
+import java.time.LocalDateTime;
 import java.util.Properties;
 
 public class Launcher extends JFrame {
 
-    private CardLayout cardLayout;
-    private JPanel cardPanel;
-    private DBConfig config = new DBConfig();
-    private JPanel dbFormPanel;
+    private final CardLayout cardLayout;
+    private final JPanel cardPanel;
+    private final DBConfig config = new DBConfig();
+    private final JPanel dbFormPanel;
+
+    String[] dbmsOptions = {"MySQL", "PostgreSQL", "SQLServer", "SQLite"};
+    String[] logoPath = {"/mysql_logo.png", "/postgresql_logo.png", "/sqlserver_logo.png", "/sqlite_logo.png"};
 
     private boolean isFullscreen = true;
 
     public Launcher() {
+
         setTitle("Warehouse Inventory System");
         getContentPane().setPreferredSize(new Dimension(400, 500));
         pack();
@@ -44,10 +50,12 @@ public class Launcher extends JFrame {
     private JPanel createLauncherPanel() {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(new Color(240, 240, 240));
+
+        JLabel statusLabel = new JLabel(" ");
+        statusLabel.setForeground(Color.RED);
+        statusLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         JPanel topPanel = new JPanel();
-        topPanel.setBackground(new Color(240, 240, 240));
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
 
         ImageIcon logoIcon = new ImageIcon(getClass().getResource("/logo.png"));
@@ -60,7 +68,6 @@ public class Launcher extends JFrame {
         topPanel.add(Box.createVerticalStrut(10));
 
         JPanel buttonsPanel = new JPanel();
-        buttonsPanel.setBackground(new Color(240, 240, 240));
         buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.Y_AXIS));
 
         JButton fullscreenButton = createStyledButton("Fullscreen: Enabled");
@@ -78,21 +85,18 @@ public class Launcher extends JFrame {
         startButton.addActionListener(e -> {
             loadConfigFromFile();
             try {
-                Database.connect(
-                        config.dbms, config.host, config.port,
-                        config.dbName, config.username, config.password
-                );
-                dispose();
-                new Session();
-                Session.getInstance().setDBMS(config.dbms);
-                Session.getInstance().setFullscreen(isFullscreen);
-                new App();
-            } catch (SQLException | ClassNotFoundException ex) {
-                JOptionPane.showMessageDialog(this,
-                        "Database connection failed:\n" + ex.getMessage(),
-                        "Error", JOptionPane.ERROR_MESSAGE);
+                launchApp();
+            } catch (Exception ex) {
+                logErrorToFile(ex);
+                statusLabel.setText("Failed to launch application. Check error log.");
+                Timer timer = new Timer(3000, evt -> {
+                    statusLabel.setText(" ");
+                    ((Timer) evt.getSource()).stop(); // Stop the timer after one run
+                });
+                timer.start();
             }
         });
+
 
         buttonsPanel.add(fullscreenButton);
         buttonsPanel.add(Box.createVerticalStrut(10));
@@ -100,6 +104,7 @@ public class Launcher extends JFrame {
         buttonsPanel.add(Box.createVerticalStrut(10));
         buttonsPanel.add(startButton);
         buttonsPanel.add(Box.createVerticalStrut(20));
+        buttonsPanel.add(statusLabel);
 
         panel.add(Box.createVerticalGlue());
         panel.add(topPanel);
@@ -118,13 +123,12 @@ public class Launcher extends JFrame {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(30, 30, 30, 30);
 
-        String[] dbmsOptions = {"MySQL", "PostgreSQL", "SQLServer", "SQLite"};
-        String[] imageNames = {"/mysql_logo.png", "/postgresql_logo.png", "/sqlserver_logo.png", "/sqlite_logo.png"};
+
 
         int gridX = 0, gridY = 0;
         for (int i = 0; i < dbmsOptions.length; i++) {
             String dbms = dbmsOptions[i];
-            URL imageUrl = getClass().getResource(imageNames[i]);
+            URL imageUrl = getClass().getResource(logoPath[i]);
             ImageIcon icon = imageUrl != null ? new ImageIcon(imageUrl) : new ImageIcon();
 
             JButton imageButton = new JButton(new ImageIcon(icon.getImage().getScaledInstance(90, 90, Image.SCALE_SMOOTH)));
@@ -201,80 +205,127 @@ public class Launcher extends JFrame {
     }
 
     private JPanel getDBFormPanel(String dbms) {
-        JPanel formPanel = new JPanel();
-        formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
-        formPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
-        formPanel.setBackground(new Color(245, 245, 245));
+        JPanel DBpanel = new JPanel();
+        DBpanel.setLayout(new BoxLayout(DBpanel, BoxLayout.Y_AXIS));
+        DBpanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
 
-        JLabel title = new JLabel("Configure " + dbms + " Connection");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 18));
-        title.setAlignmentX(Component.CENTER_ALIGNMENT);
-        formPanel.add(title);
-        formPanel.add(Box.createVerticalStrut(20));
+        int imgNo = switch (dbms) {
+            case "MySQL" -> 0;
+            case "PostgreSQL" -> 1;
+            case "SQLServer" -> 2;
+            case "SQLite" -> 3;
+            default -> throw new IllegalStateException("Unexpected value: " + dbms);
+        };
+        URL imageUrl = getClass().getResource(logoPath[imgNo]);
+        ImageIcon icon = imageUrl != null ? new ImageIcon(imageUrl) : new ImageIcon();
+        JButton imageButton = new JButton(new ImageIcon(icon.getImage().getScaledInstance(90, 90, Image.SCALE_SMOOTH)));
+        imageButton.setPreferredSize(new Dimension(100, 100));
+        imageButton.setContentAreaFilled(false);
+        imageButton.setBorderPainted(false);
+        imageButton.setFocusPainted(false);
+        imageButton.setOpaque(false);
+        imageButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        DBpanel.add(imageButton);
 
-        JTextField hostField = null, portField = null, dbField, userField = null;
-        JPasswordField passField = null;
 
-        if (!dbms.equalsIgnoreCase("SQLite")) {
-            hostField = addFormRow("Host:", "localhost", formPanel);
-            portField = addFormRow("Port:", getDefaultPort(dbms), formPanel);
-            dbField = addFormRow("Database Name:", "warehouse_db", formPanel);
-            userField = addFormRow("Username:", "root", formPanel);
-            passField = addPasswordRow("Password:", "password", formPanel);
+
+        boolean isSQLite = dbms.equalsIgnoreCase("SQLite");
+
+        JTextField hostField, portField, dbField, userField;
+        JPasswordField passField;
+
+        JLabel statusLabel = new JLabel(" ");
+        statusLabel.setForeground(Color.RED);
+        statusLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        if (isSQLite) {
+            passField = null;
+            userField = null;
+            portField = null;
+            hostField = null;
+            dbField = addFormRow("Database Path:", "warehouse_db.sqlite", DBpanel);
+            JButton browseButton = createStyledButton("Browse");
+            browseButton.addActionListener(e -> {
+                JFileChooser chooser = new JFileChooser();
+                chooser.setDialogTitle("Select SQLite DB File");
+                if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                    dbField.setText(chooser.getSelectedFile().getAbsolutePath());
+                }
+            });
+            DBpanel.add(Box.createVerticalStrut(10));
+            DBpanel.add(browseButton);
         } else {
-            dbField = addFormRow("Database File Path:", "warehouse_db.sqlite", formPanel);
+            hostField = addFormRow("Host:", "localhost", DBpanel);
+            portField = addFormRow("Port:", getDefaultPort(dbms), DBpanel);
+            dbField = addFormRow("Database Name:", "warehouse_db", DBpanel);
+            userField = addFormRow("Username:", "root", DBpanel);
+            passField = addPasswordRow(DBpanel);
         }
 
-        formPanel.add(Box.createVerticalStrut(20));
-
         JButton saveBtn = createStyledButton("Save Configuration");
-        JTextField finalUserField = userField;
-        JTextField finalPortField = portField;
-        JTextField finalHostField = hostField;
-        JPasswordField finalPassField = passField;
         saveBtn.addActionListener(e -> {
-            config.dbName = dbField.getText().trim();
-            if (!dbms.equalsIgnoreCase("SQLite")) {
-                config.host = finalHostField.getText().trim();
-                config.port = finalPortField.getText().trim();
-                config.username = finalUserField.getText().trim();
-                config.password = new String(finalPassField.getPassword()).trim();
-            } else {
-                config.host = config.port = config.username = config.password = "null";
-            }
+            fillConfig(dbms, isSQLite, hostField, portField, dbField, userField, passField);
             saveConfigToFile();
-            JOptionPane.showMessageDialog(this, "Configuration saved for " + dbms);
-            cardLayout.show(cardPanel, "Launcher");
+            statusLabel.setText("Configuration saved for " + dbms);
+            Timer timer = new Timer(3000, evt -> {
+                statusLabel.setText(" ");
+                ((Timer) evt.getSource()).stop(); // Stop the timer after one run
+            });
+            timer.start();
+        });
+
+        JButton launchBtn = createStyledButton("Launch Without Saving");
+        launchBtn.addActionListener(e -> {
+            fillConfig(dbms, isSQLite, hostField, portField, dbField, userField, passField);
+            try {
+                launchApp();
+            } catch (Exception exception) {
+                statusLabel.setText("Failed to launch application. Check error log.");
+                Timer timer = new Timer(3000, evt -> {
+                    statusLabel.setText(" ");
+                    ((Timer) evt.getSource()).stop(); // Stop the timer after one run
+                });
+                timer.start();
+                logErrorToFile(exception);
+            }
         });
 
         JButton backBtn = createStyledButton("Back");
         backBtn.addActionListener(e -> cardLayout.show(cardPanel, "DBMSSelection"));
 
-        JPanel buttonRow = new JPanel();
-        buttonRow.setBackground(new Color(245, 245, 245));
-        buttonRow.add(saveBtn);
-        buttonRow.add(backBtn);
+        DBpanel.add(Box.createVerticalStrut(10));
+        DBpanel.add(saveBtn);
+        DBpanel.add(Box.createVerticalStrut(10));
+        DBpanel.add(launchBtn);
+        DBpanel.add(Box.createVerticalStrut(10));
+        DBpanel.add(backBtn);
 
-        formPanel.add(buttonRow);
-        return formPanel;
+
+        DBpanel.add(Box.createVerticalStrut(10));
+        DBpanel.add(statusLabel);
+
+        JPanel wrapper = new JPanel(new GridBagLayout());
+        wrapper.add(DBpanel);
+        return wrapper;
     }
+
 
 
     private JTextField addFormRow(String label, String defaultValue, JPanel parent) {
         JPanel row = new JPanel(new GridBagLayout());
-        row.setBackground(new Color(245, 245, 245));
         GridBagConstraints gbc = new GridBagConstraints();
 
         JLabel jLabel = new JLabel(label);
         jLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        jLabel.setPreferredSize(new Dimension(120, 25)); // consistent label width
 
         JTextField field = new JTextField(defaultValue);
         field.setPreferredSize(new Dimension(200, 30));
 
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(0, 5, 0, 10);
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.insets = new Insets(1, 0, 1, 10); // tighter spacing
         row.add(jLabel, gbc);
 
         gbc.gridx = 1;
@@ -282,25 +333,29 @@ public class Launcher extends JFrame {
         gbc.weightx = 1.0;
         row.add(field, gbc);
 
+
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, row.getPreferredSize().height));
+
         parent.add(row);
         return field;
     }
 
-    private JPasswordField addPasswordRow(String label, String defaultValue, JPanel parent) {
+
+    private JPasswordField addPasswordRow(JPanel parent) {
         JPanel row = new JPanel(new GridBagLayout());
-        row.setBackground(new Color(245, 245, 245));
         GridBagConstraints gbc = new GridBagConstraints();
 
-        JLabel jLabel = new JLabel(label);
+        JLabel jLabel = new JLabel("Password:");
         jLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        jLabel.setPreferredSize(new Dimension(120, 25)); // consistent label width
 
-        JPasswordField field = new JPasswordField(defaultValue);
+        JPasswordField field = new JPasswordField("password");
         field.setPreferredSize(new Dimension(200, 30));
 
         gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(5, 5, 5, 10);
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.insets = new Insets(1, 0, 1, 10);
         row.add(jLabel, gbc);
 
         gbc.gridx = 1;
@@ -308,10 +363,12 @@ public class Launcher extends JFrame {
         gbc.weightx = 1.0;
         row.add(field, gbc);
 
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, row.getPreferredSize().height));
+
         parent.add(row);
-        parent.add(Box.createVerticalStrut(10));
         return field;
     }
+
 
 
     private JButton createStyledButton(String text) {
@@ -353,10 +410,10 @@ public class Launcher extends JFrame {
         props.setProperty("dbName", config.dbName);
         boolean isSQLite = "SQLite".equalsIgnoreCase(config.dbms);
         if (!isSQLite) {
-            props.setProperty("host", config.host);
-            props.setProperty("port", config.port);
-            props.setProperty("username", config.username);
-            props.setProperty("password", config.password);
+            if (config.host != null) props.setProperty("host", config.host);
+            if (config.port != null) props.setProperty("port", config.port);
+            if (config.username != null) props.setProperty("username", config.username);
+            if (config.password != null) props.setProperty("password", config.password);
         } else {
             props.setProperty("host", "null");
             props.setProperty("port", "null");
@@ -367,7 +424,8 @@ public class Launcher extends JFrame {
         try (FileOutputStream out = new FileOutputStream("config.properties")) {
             props.store(out, null);
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Failed to save config:\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            logErrorToFile(e);
+
         }
     }
 
@@ -382,7 +440,51 @@ public class Launcher extends JFrame {
             config.username = props.getProperty("username");
             config.password = props.getProperty("password");
         } catch (IOException e) {
-            JOptionPane.showMessageDialog(this, "Failed to load config:\n" + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            logErrorToFile(e);
+
         }
     }
+
+    private void fillConfig(String dbms, boolean isSQLite,
+                            JTextField hostField, JTextField portField,
+                            JTextField dbField, JTextField userField, JPasswordField passField) {
+        config.dbms = dbms;
+        config.dbName = dbField.getText().trim();
+
+        if (isSQLite) {
+            config.host = config.port = config.username = config.password = "null";
+        } else {
+            config.host = hostField.getText().trim();
+            config.port = portField.getText().trim();
+            config.username = userField.getText().trim();
+            config.password = new String(passField.getPassword()).trim();
+        }
+    }
+
+    private void launchApp() throws Exception {
+        Database.connect(
+                config.dbms, config.host, config.port,
+                config.dbName, config.username, config.password
+        );
+        dispose();
+        new Session();
+        Session.getInstance().setDBMS(config.dbms);
+        Session.getInstance().setFullscreen(isFullscreen);
+        new App();
+    }
+
+    private void logErrorToFile(Exception e) {
+        try (FileOutputStream fos = new FileOutputStream("errorlog.txt", true)) {
+            StringBuilder logMessage = new StringBuilder("[" + LocalDateTime.now() + "] " +
+                    e.toString() + "\n");
+            for (StackTraceElement ste : e.getStackTrace()) {
+                logMessage.append("\tat ").append(ste.toString()).append("\n");
+            }
+            logMessage.append("\n");
+            fos.write(logMessage.toString().getBytes());
+        } catch (IOException ioEx) {
+            ioEx.printStackTrace(); // fallback to console
+        }
+    }
+
 }

@@ -1,7 +1,5 @@
 package logic;
 
-import gui.SplashScreen;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -40,10 +38,10 @@ public class App extends JFrame {
             disableFullscreen(); // This will actually just re-set everything properly
         }
 
-        setScreen(new gui.SplashScreen()); // show first screen
+        setScreen(new SplashScreen()); // show first screen
 
         // Show splash screen with a delay of 4000ms (4 seconds)
-        gui.SplashScreen splashScreen = (SplashScreen) ((AspectRatioPanel) root.getComponent(0)).content;  // Access SplashScreen directly
+        SplashScreen splashScreen = (SplashScreen) ((AspectRatioPanel) root.getComponent(0)).content;  // Access SplashScreen directly
         splashScreen.showSplashScreen(4000);  // Call the splash screen show method
 
         // ESC keybind

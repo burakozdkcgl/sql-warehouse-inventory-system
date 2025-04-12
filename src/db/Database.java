@@ -35,6 +35,7 @@ public class Database {
                 default -> throw new IllegalArgumentException("Unsupported DBMS type: " + dbms);
             };
 
+            System.out.println(url);
             if ("sqlite".equals(dbmsNormalized)) {
                 connection = DriverManager.getConnection(url);
             } else {
