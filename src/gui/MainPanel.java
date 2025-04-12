@@ -6,8 +6,6 @@ import model.User;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class MainPanel extends JPanel {
 
@@ -51,13 +49,21 @@ public class MainPanel extends JPanel {
             menuButton.setAlignmentX(Component.CENTER_ALIGNMENT);
             menuPanel.add(menuButton);
             menuPanel.add(Box.createVerticalStrut(10));
-            menuButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    // Access the App singleton instance and toggle fullscreen
-                    App.getInstance().toggleFullscreen();
+            menuButton.addActionListener(e -> {
+                App app = App.getInstance();
+                switch (item) {
+                    case "Profile":
+                        app.setScreen(new UserProfilePanel(App.getInstance().getCurrentUser()));
+                        break;
+                    case "Settings":
+                        app.setScreen(new SettingsPanel());
+                        break;
+                    default:
+                        JOptionPane.showMessageDialog(this, item + " is under construction!");
+                        break;
                 }
             });
+            
         }
 
         whiteBox.add(menuPanel, BorderLayout.WEST);

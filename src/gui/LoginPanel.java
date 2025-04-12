@@ -5,7 +5,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 
 import logic.App;
-import logic.Auth;
+import db.Auth;
 
 public class LoginPanel extends JPanel {
 
@@ -81,13 +81,13 @@ public class LoginPanel extends JPanel {
         loginButton.addActionListener((ActionEvent e) -> {
             String id = idField.getText();
             String password = new String(passField.getPassword());
-            if (Auth.isLoginValid(id, password)) {
+            if (Auth.attemptLogin(id, password)) {
                 App app = App.getInstance();
                 model.User user = new model.User(id);
                 app.setCurrentUser(user);
                 app.setScreen(new MainPanel());
             } else {
-                showErrorMessage("Invalid credentials!");
+                JOptionPane.showMessageDialog(this, "Invalid credentials!", "", JOptionPane.ERROR_MESSAGE);
             }
         });
 
@@ -106,10 +106,6 @@ public class LoginPanel extends JPanel {
         button.setBackground(new Color(70, 130, 180));
         button.setForeground(Color.WHITE);
         button.setFocusPainted(false);
-    }
-
-    private void showErrorMessage(String message) {
-        JOptionPane.showMessageDialog(this, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     @Override

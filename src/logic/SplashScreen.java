@@ -9,7 +9,7 @@ import java.awt.event.ActionListener;
 
 public class SplashScreen extends JPanel {
 
-    private JProgressBar progressBar;
+    private final JProgressBar progressBar;
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -24,8 +24,20 @@ public class SplashScreen extends JPanel {
         // Create and customize the progress bar
         progressBar = new JProgressBar(0, 100);
         progressBar.setStringPainted(true);
-        progressBar.setForeground(new Color(70, 130, 180));
-        progressBar.setBackground(Color.DARK_GRAY);
+        progressBar.setForeground(new Color(9, 41, 61));
+        progressBar.setBackground(Color.GRAY);
+        
+        progressBar.setUI(new javax.swing.plaf.basic.BasicProgressBarUI() {
+            @Override
+            protected Color getSelectionForeground() {
+                return Color.WHITE; // Text color over filled area
+            }
+        
+            @Override
+            protected Color getSelectionBackground() {
+                return Color.WHITE; // Text color over unfilled area
+            }
+        });
 
         // Adjust the width and height of the progress bar
         int barWidth = 300;  // Set a reasonable width
@@ -46,6 +58,20 @@ public class SplashScreen extends JPanel {
 
     public void showSplashScreen(int delay) {
         // Timer to increment progress bar
+        Timer progressTimer = getTimer();
+        progressTimer.start(); // Start the progress bar animation
+
+        // Timer to change screen after a delay (using java.util.Timer)
+        new java.util.Timer().schedule(new java.util.TimerTask() {
+            @Override
+            public void run() {
+                App app = App.getInstance();
+                app.setScreen(new LoginPanel()); // Transition to LoginPanel
+            }
+        }, delay); // The delay before switching to the LoginPanel (e.g., 3 seconds)
+    }
+
+    private Timer getTimer() {
         ActionListener progressUpdater = new ActionListener() {
             int progress = 0;
 
@@ -61,16 +87,6 @@ public class SplashScreen extends JPanel {
             }
         };
 
-        Timer progressTimer = new Timer(30, progressUpdater);
-        progressTimer.start(); // Start the progress bar animation
-
-        // Timer to change screen after a delay (using java.util.Timer)
-        new java.util.Timer().schedule(new java.util.TimerTask() {
-            @Override
-            public void run() {
-                App app = App.getInstance();
-                app.setScreen(new LoginPanel()); // Transition to LoginPanel
-            }
-        }, delay); // The delay before switching to the LoginPanel (e.g., 3 seconds)
+        return new Timer(30, progressUpdater);
     }
 }
