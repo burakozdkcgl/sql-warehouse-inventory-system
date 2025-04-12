@@ -1,6 +1,7 @@
-package logic;
+package gui;
 
 import gui.LoginPanel;
+import logic.App;
 
 import javax.swing.*;
 import java.awt.*;

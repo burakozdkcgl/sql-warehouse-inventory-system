@@ -8,6 +8,12 @@ import java.awt.*;
 
 public class UserProfilePanel extends JPanel {
 
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Image bg = new ImageIcon(getClass().getResource("/test2.png")).getImage();
+        g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+    }
+
     public UserProfilePanel(User user) {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);

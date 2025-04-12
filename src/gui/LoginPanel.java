@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 
 import logic.App;
 import db.Auth;
+import logic.Session;
 
 public class LoginPanel extends JPanel {
 
@@ -37,6 +38,8 @@ public class LoginPanel extends JPanel {
         centerPanel.add(Box.createVerticalGlue(), gbc);
 
         add(centerPanel, BorderLayout.CENTER);
+
+        System.out.println(Session.getInstance().getDBMS());
 
     }
 
@@ -82,10 +85,8 @@ public class LoginPanel extends JPanel {
             String id = idField.getText();
             String password = new String(passField.getPassword());
             if (Auth.attemptLogin(id, password)) {
-                App app = App.getInstance();
-                model.User user = new model.User(id);
-                app.setCurrentUser(user);
-                app.setScreen(new MainPanel());
+                Session.getInstance().setCurrentUser(new model.User(id));
+                App.getInstance().setScreen(new MainPanel());
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid credentials!", "", JOptionPane.ERROR_MESSAGE);
             }

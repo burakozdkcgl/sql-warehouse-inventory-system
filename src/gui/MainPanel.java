@@ -1,6 +1,7 @@
 package gui;
 
 import logic.App;
+import logic.Session;
 import model.User;
 
 import javax.swing.*;
@@ -20,7 +21,7 @@ public class MainPanel extends JPanel {
         setLayout(new GridBagLayout());
         setOpaque(false);
 
-        User user = App.getInstance().getCurrentUser();
+        User user = Session.getInstance().getCurrentUser();
         if (user == null) return;
 
         JPanel whiteBox = new JPanel();
@@ -53,7 +54,7 @@ public class MainPanel extends JPanel {
                 App app = App.getInstance();
                 switch (item) {
                     case "Profile":
-                        app.setScreen(new UserProfilePanel(App.getInstance().getCurrentUser()));
+                        app.setScreen(new UserProfilePanel(Session.getInstance().getCurrentUser()));
                         break;
                     case "Settings":
                         app.setScreen(new SettingsPanel());

@@ -1,5 +1,7 @@
 package logic;
 
+import gui.SplashScreen;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -8,24 +10,14 @@ public class App extends JFrame {
     private final JPanel root = new JPanel(new BorderLayout());
     private static App instance;
 
-    private boolean isFullscreen = false;
-
-    private model.User currentUser;
-
 
     public static App getInstance() {
         return instance;
     }
 
-    public void setCurrentUser(model.User user) {
-        this.currentUser = user;
-    }
 
-    public model.User getCurrentUser() {
-        return currentUser;
-    }
 
-    public App(boolean fullscreen) {
+    public App() {
         instance = this;
         setTitle("Warehouse Inventory System");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
@@ -39,16 +31,19 @@ public class App extends JFrame {
         setVisible(true);
 
         // THEN change fullscreen state after shown
-        if (fullscreen) {
-            enableFullscreen();
+        if (Session.getInstance().isFullscreen()) {
+            dispose();
+            setUndecorated(true);
+            setExtendedState(JFrame.MAXIMIZED_BOTH);
+            setVisible(true);
         } else {
             disableFullscreen(); // This will actually just re-set everything properly
         }
 
-        setScreen(new SplashScreen()); // show first screen
+        setScreen(new gui.SplashScreen()); // show first screen
 
         // Show splash screen with a delay of 4000ms (4 seconds)
-        SplashScreen splashScreen = (SplashScreen) ((AspectRatioPanel) root.getComponent(0)).content;  // Access SplashScreen directly
+        gui.SplashScreen splashScreen = (SplashScreen) ((AspectRatioPanel) root.getComponent(0)).content;  // Access SplashScreen directly
         splashScreen.showSplashScreen(4000);  // Call the splash screen show method
 
         // ESC keybind
@@ -58,7 +53,7 @@ public class App extends JFrame {
         getRootPane().getActionMap().put("exitFullscreen", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                if (!isFullscreen) return;
+                if (!Session.getInstance().isFullscreen()) return;
                 disableFullscreen();
             }
         });
@@ -81,9 +76,9 @@ public class App extends JFrame {
 
 
     public void enableFullscreen() {
-        if (isFullscreen) return;
+        if (Session.getInstance().isFullscreen()) return;
 
-        isFullscreen = true;
+        Session.getInstance().setFullscreen(true);
         dispose();
         setUndecorated(true);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -92,7 +87,7 @@ public class App extends JFrame {
 
     public void disableFullscreen() {
 
-        isFullscreen = false;
+        Session.getInstance().setFullscreen(false);
         dispose();
         setUndecorated(false);
         setResizable(false); // <-- move this up!
@@ -107,7 +102,7 @@ public class App extends JFrame {
     }
 
     public void toggleFullscreen() {
-        if (isFullscreen) {
+        if (Session.getInstance().isFullscreen()) {
             disableFullscreen();
         } else {
             enableFullscreen();

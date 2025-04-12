@@ -1,4 +1,3 @@
-
 package logic;
 
 import db.Database;
@@ -32,8 +31,8 @@ public class Launcher extends JFrame {
 
         cardPanel.add(createLauncherPanel(), "Launcher");
         cardPanel.add(getDBMSSelectionPanel(), "DBMSSelection");
-
-        dbFormPanel = new JPanel(new BorderLayout());
+        dbFormPanel = new JPanel();
+        dbFormPanel.setLayout(new BorderLayout());
         cardPanel.add(dbFormPanel, "DBMSForm");
 
         add(cardPanel);
@@ -42,10 +41,12 @@ public class Launcher extends JFrame {
     }
 
     private JPanel createLauncherPanel() {
+
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBackground(new Color(240, 240, 240));
+        panel.setBackground(new Color(240, 240, 240)); // Light background for contrast
 
+        // Logo and Title
         JPanel topPanel = new JPanel();
         topPanel.setBackground(new Color(240, 240, 240));
         topPanel.setLayout(new BoxLayout(topPanel, BoxLayout.Y_AXIS));
@@ -55,17 +56,25 @@ public class Launcher extends JFrame {
         JLabel logoLabel = new JLabel(new ImageIcon(scaledLogo));
         logoLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
+
         topPanel.add(Box.createVerticalStrut(20));
         topPanel.add(logoLabel);
         topPanel.add(Box.createVerticalStrut(10));
 
+
+        // Buttons Panel
         JPanel buttonsPanel = new JPanel();
         buttonsPanel.setBackground(new Color(240, 240, 240));
         buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.Y_AXIS));
 
         JButton fullscreenButton = createStyledButton("Fullscreen: Enabled");
+
+
         JButton configButton = createStyledButton("Configure Database");
+
         JButton startButton = createStyledButton("Start Application");
+
+
 
         configButton.addActionListener(e -> cardLayout.show(cardPanel, "DBMSSelection"));
 
@@ -79,8 +88,12 @@ public class Launcher extends JFrame {
             loadConfigFromFile();
             try {
                 Database.connect(
-                        config.dbms, config.host, config.port,
-                        config.dbName, config.username, config.password
+                        config.dbms,
+                        config.host,
+                        config.port,
+                        config.dbName,
+                        config.username,
+                        config.password
                 );
                 dispose();
                 new Session();
@@ -94,13 +107,17 @@ public class Launcher extends JFrame {
             }
         });
 
+
         buttonsPanel.add(fullscreenButton);
         buttonsPanel.add(Box.createVerticalStrut(10));
+
         buttonsPanel.add(configButton);
         buttonsPanel.add(Box.createVerticalStrut(10));
+
         buttonsPanel.add(startButton);
         buttonsPanel.add(Box.createVerticalStrut(20));
 
+        // Assemble full layout
         panel.add(Box.createVerticalGlue());
         panel.add(topPanel);
         panel.add(Box.createVerticalGlue());
@@ -109,6 +126,8 @@ public class Launcher extends JFrame {
 
         return panel;
     }
+
+
 
     private JPanel getDBMSSelectionPanel() {
         JPanel panel = new JPanel(new BorderLayout(10, 10));
@@ -121,7 +140,9 @@ public class Launcher extends JFrame {
         String[] dbmsOptions = {"MySQL", "PostgreSQL", "SQLServer", "SQLite"};
         String[] imageNames = {"/mysql_logo.png", "/postgresql_logo.png", "/sqlserver_logo.png", "/sqlite_logo.png"};
 
-        int gridX = 0, gridY = 0;
+        int gridX = 0;
+        int gridY = 0;
+
         for (int i = 0; i < dbmsOptions.length; i++) {
             String dbms = dbmsOptions[i];
             URL imageUrl = getClass().getResource(imageNames[i]);
@@ -136,11 +157,7 @@ public class Launcher extends JFrame {
 
             imageButton.addActionListener(e -> {
                 config.dbms = dbms;
-                dbFormPanel.removeAll();
-                dbFormPanel.add(getDBFormPanel(dbms), BorderLayout.CENTER);
-                dbFormPanel.revalidate();
-                dbFormPanel.repaint();
-                cardLayout.show(cardPanel, "DBMSForm");
+                showDBForm(dbms);
             });
 
             imageButton.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -185,7 +202,12 @@ public class Launcher extends JFrame {
             gbc.gridx = gridX;
             gbc.gridy = gridY;
             imagePanel.add(imageButton, gbc);
-            if (++gridX > 1) { gridX = 0; gridY++; }
+
+            gridX++;
+            if (gridX > 1) {
+                gridX = 0;
+                gridY++;
+            }
         }
 
         JButton backBtn = createStyledButton("Back");
@@ -200,45 +222,55 @@ public class Launcher extends JFrame {
         return panel;
     }
 
-    private JPanel getDBFormPanel(String dbms) {
-        JPanel formPanel = new JPanel();
-        formPanel.setLayout(new BoxLayout(formPanel, BoxLayout.Y_AXIS));
-        formPanel.setBorder(BorderFactory.createEmptyBorder(30, 30, 30, 30));
-        formPanel.setBackground(new Color(245, 245, 245));
+
+
+    private void showDBForm(String dbms) {
+        dbFormPanel.removeAll();
+
+        JPanel form = new JPanel();
+        form.setLayout(new BoxLayout(form, BoxLayout.Y_AXIS));
+        form.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JLabel title = new JLabel("Configure " + dbms + " Connection");
-        title.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        title.setFont(new Font("Segoe UI", Font.BOLD, 14));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
-        formPanel.add(title);
-        formPanel.add(Box.createVerticalStrut(20));
+        form.add(title);
+        form.add(Box.createVerticalStrut(10));
 
-        JTextField hostField = null, portField = null, dbField, userField = null;
-        JPasswordField passField = null;
+        JTextField hostField, portField, dbField, userField;
+        JPasswordField passField;
 
         if (!dbms.equalsIgnoreCase("SQLite")) {
-            hostField = addFormRow("Host:", "localhost", formPanel);
-            portField = addFormRow("Port:", getDefaultPort(dbms), formPanel);
-            dbField = addFormRow("Database Name:", "warehouse_db", formPanel);
-            userField = addFormRow("Username:", "root", formPanel);
-            passField = addPasswordRow("Password:", "password", formPanel);
+            hostField = createField("Host:", "localhost");
+            portField = createField("Port:", getDefaultPort(dbms));
+            dbField = createField("Database Name:", "warehouse_db");
+            userField = createField("Username:", "root");
+            passField = new JPasswordField("password");
+            passField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+
+            form.add(hostField);
+            form.add(portField);
+            form.add(dbField);
+            form.add(userField);
+            form.add(new JLabel("Password:"));
+            form.add(passField);
         } else {
-            dbField = addFormRow("Database File Path:", "warehouse_db.sqlite", formPanel);
+            userField = null;
+            passField = null;
+            portField = null;
+            hostField = null;
+            dbField = createField("Database File Path:", "warehouse_db.sqlite");
+            form.add(dbField);
         }
 
-        formPanel.add(Box.createVerticalStrut(20));
-
-        JButton saveBtn = createStyledButton("Save Configuration");
-        JTextField finalUserField = userField;
-        JTextField finalPortField = portField;
-        JTextField finalHostField = hostField;
-        JPasswordField finalPassField = passField;
+        JButton saveBtn = new JButton("Save Configuration");
         saveBtn.addActionListener(e -> {
             config.dbName = dbField.getText().trim();
             if (!dbms.equalsIgnoreCase("SQLite")) {
-                config.host = finalHostField.getText().trim();
-                config.port = finalPortField.getText().trim();
-                config.username = finalUserField.getText().trim();
-                config.password = new String(finalPassField.getPassword()).trim();
+                config.host = hostField.getText().trim();
+                config.port = portField.getText().trim();
+                config.username = userField.getText().trim();
+                config.password = new String(passField.getPassword()).trim();
             } else {
                 config.host = config.port = config.username = config.password = "null";
             }
@@ -247,91 +279,20 @@ public class Launcher extends JFrame {
             cardLayout.show(cardPanel, "Launcher");
         });
 
-        JButton backBtn = createStyledButton("Back");
+        JButton backBtn = new JButton("Back");
         backBtn.addActionListener(e -> cardLayout.show(cardPanel, "DBMSSelection"));
 
         JPanel buttonRow = new JPanel();
-        buttonRow.setBackground(new Color(245, 245, 245));
         buttonRow.add(saveBtn);
         buttonRow.add(backBtn);
 
-        formPanel.add(buttonRow);
-        return formPanel;
-    }
+        form.add(Box.createVerticalStrut(20));
+        form.add(buttonRow);
 
-
-    private JTextField addFormRow(String label, String defaultValue, JPanel parent) {
-        JPanel row = new JPanel(new GridBagLayout());
-        row.setBackground(new Color(245, 245, 245));
-        GridBagConstraints gbc = new GridBagConstraints();
-
-        JLabel jLabel = new JLabel(label);
-        jLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-
-        JTextField field = new JTextField(defaultValue);
-        field.setPreferredSize(new Dimension(200, 30));
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(0, 5, 0, 10);
-        row.add(jLabel, gbc);
-
-        gbc.gridx = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1.0;
-        row.add(field, gbc);
-
-        parent.add(row);
-        return field;
-    }
-
-    private JPasswordField addPasswordRow(String label, String defaultValue, JPanel parent) {
-        JPanel row = new JPanel(new GridBagLayout());
-        row.setBackground(new Color(245, 245, 245));
-        GridBagConstraints gbc = new GridBagConstraints();
-
-        JLabel jLabel = new JLabel(label);
-        jLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-
-        JPasswordField field = new JPasswordField(defaultValue);
-        field.setPreferredSize(new Dimension(200, 30));
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.WEST;
-        gbc.insets = new Insets(5, 5, 5, 10);
-        row.add(jLabel, gbc);
-
-        gbc.gridx = 1;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.weightx = 1.0;
-        row.add(field, gbc);
-
-        parent.add(row);
-        parent.add(Box.createVerticalStrut(10));
-        return field;
-    }
-
-
-    private JButton createStyledButton(String text) {
-        JButton button = new JButton(text);
-        button.setBackground(new Color(100, 100, 100));
-        button.setAlignmentX(Component.CENTER_ALIGNMENT);
-        button.setFocusPainted(false);
-        button.setBorderPainted(false);
-        button.setContentAreaFilled(false);
-        button.setOpaque(true);
-        button.setForeground(Color.WHITE);
-        button.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        button.setMaximumSize(new Dimension(200, 40));
-        button.getModel().addChangeListener(e -> {
-            ButtonModel model = button.getModel();
-            if (model.isPressed()) button.setBackground(new Color(80, 80, 80));
-            else if (model.isRollover()) button.setBackground(new Color(120, 120, 120));
-            else button.setBackground(new Color(100, 100, 100));
-        });
-        return button;
+        dbFormPanel.add(form, BorderLayout.CENTER);
+        dbFormPanel.revalidate();
+        dbFormPanel.repaint();
+        cardLayout.show(cardPanel, "DBMSForm");
     }
 
     private String getDefaultPort(String dbms) {
@@ -342,6 +303,48 @@ public class Launcher extends JFrame {
             default -> "";
         };
     }
+
+    private JTextField createField(String label, String defaultValue) {
+        JLabel jLabel = new JLabel(label);
+        JTextField field = new JTextField(defaultValue);
+        field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+        JPanel wrapper = new JPanel();
+        wrapper.setLayout(new BoxLayout(wrapper, BoxLayout.Y_AXIS));
+        wrapper.add(jLabel);
+        wrapper.add(field);
+        wrapper.add(Box.createVerticalStrut(10));
+        return field;
+    }
+
+    private JButton createStyledButton(String text) {
+        JButton button = new JButton(text);
+        button.setBackground(new Color(100, 100, 100));
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.setFocusPainted(false);
+        button.setBorderPainted(false);
+        button.setContentAreaFilled(false); // Important!
+        button.setOpaque(true);
+        button.setForeground(Color.WHITE);
+        button.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        button.setMaximumSize(new Dimension(200, 40));
+        button.getModel().addChangeListener(e -> {
+            ButtonModel model = button.getModel();
+            if (model.isPressed()) {
+                button.setBackground(new Color(80, 80, 80));
+            } else if (model.isRollover()) {
+                button.setBackground(new Color(120, 120, 120));
+            } else {
+                button.setBackground(new Color(100, 100, 100));
+            }
+        });
+
+        return button;
+    }
+
+
+
+
+
 
     static class DBConfig {
         String dbms, host, port, dbName, username, password;

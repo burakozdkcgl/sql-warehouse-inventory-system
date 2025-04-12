@@ -28,11 +28,21 @@ public class Database {
                     Class.forName("com.mysql.cj.jdbc.Driver");
                     yield "jdbc:mysql://" + host + ":" + port + "/" + dbName;
                 }
+                case "sqlite" -> {
+                    Class.forName("org.sqlite.JDBC");
+                    yield "jdbc:sqlite:" + dbName; // dbName is the path to the .db file
+                }
                 default -> throw new IllegalArgumentException("Unsupported DBMS type: " + dbms);
             };
 
-            connection = DriverManager.getConnection(url, username, password);
+            if ("sqlite".equals(dbmsNormalized)) {
+                connection = DriverManager.getConnection(url);
+            } else {
+                connection = DriverManager.getConnection(url, username, password);
+            }
         }
+
+        System.out.println("Connection successful");
     }
 
 
@@ -43,6 +53,7 @@ public class Database {
 
     public static void close() throws SQLException {
         if (connection != null && !connection.isClosed()) {
+            System.out.println("Connection closed");
             connection.close();
         }
     }
