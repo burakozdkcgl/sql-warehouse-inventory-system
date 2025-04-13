@@ -1,5 +1,8 @@
 package db;
 
+import logic.ConfigManager;
+import logic.Session;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -7,11 +10,16 @@ public class Database {
     private static Connection connection;
 
 
-
-    public static void connect(String dbms, String host, String port, String dbName, String username, String password)
+    public static void connect()
             throws SQLException, ClassNotFoundException {
+        ConfigManager.DBConfig config = ConfigManager.getConfig();
 
-        System.out.println("Attempting to load driver: " + dbms);
+        String dbms = config.dbms;
+        String host = config.host;
+        String port = config.port;
+        String dbName = config.dbName;
+        String username = config.username;
+        String password = config.password;
 
         if (connection == null || connection.isClosed()) {
             String dbmsNormalized = dbms.trim().toLowerCase();
@@ -35,15 +43,16 @@ public class Database {
                 default -> throw new IllegalArgumentException("Unsupported DBMS type: " + dbms);
             };
 
-            System.out.println(url);
+            System.out.println(dbms);
+
             if ("sqlite".equals(dbmsNormalized)) {
                 connection = DriverManager.getConnection(url);
             } else {
                 connection = DriverManager.getConnection(url, username, password);
             }
-        }
 
-        System.out.println("Connection successful");
+            Session.getInstance().setDBMS(dbms);
+        }
     }
 
 

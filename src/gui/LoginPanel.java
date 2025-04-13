@@ -12,6 +12,7 @@ public class LoginPanel extends JPanel {
 
     public LoginPanel() {
 
+        System.out.println(Session.getInstance().getDBMS());
         setLayout(new BorderLayout());
 
         JPanel centerPanel = new JPanel(new GridBagLayout());
@@ -39,7 +40,6 @@ public class LoginPanel extends JPanel {
 
         add(centerPanel, BorderLayout.CENTER);
 
-        System.out.println(Session.getInstance().getDBMS());
 
     }
 
