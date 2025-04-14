@@ -2,7 +2,7 @@ package gui;
 
 import logic.App;
 import logic.Session;
-import model.User;
+import entity.User;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -76,15 +76,7 @@ public class MainPanel extends JPanel {
         contentPanel.add(new JLabel("Content Area"));
         whiteBox.add(contentPanel, BorderLayout.CENTER);
 
-        // Admin Button
-        if ("admin".equals(user.getRole())) {
-            JButton adminButton = new JButton("Open Admin Panel");
 
-            JPanel bottomPanel = new JPanel();
-            bottomPanel.setOpaque(false);
-            bottomPanel.add(adminButton);
-            whiteBox.add(bottomPanel, BorderLayout.SOUTH);
-        }
 
         add(whiteBox);
     }

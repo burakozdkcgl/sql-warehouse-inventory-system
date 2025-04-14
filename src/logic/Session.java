@@ -1,9 +1,11 @@
 package logic;
 
+import entity.User;
+
 public class Session {
 
     private static Session instance;
-    private model.User currentUser;
+    private User currentUser;
     private String DBMS;
     private boolean isFullscreen;
 
@@ -15,11 +17,11 @@ public class Session {
         instance = this;
     }
 
-    public void setCurrentUser(model.User user) {
+    public void setCurrentUser(User user) {
         this.currentUser = user;
     }
 
-    public model.User getCurrentUser() {
+    public User getCurrentUser() {
         return currentUser;
     }
 

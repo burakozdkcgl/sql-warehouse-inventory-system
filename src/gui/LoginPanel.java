@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
+import entity.User;
 import logic.App;
 import db.Auth;
 import logic.Session;
@@ -12,7 +13,6 @@ public class LoginPanel extends JPanel {
 
     public LoginPanel() {
 
-        System.out.println(Session.getInstance().getDBMS());
         setLayout(new BorderLayout());
 
         JPanel centerPanel = new JPanel(new GridBagLayout());
@@ -84,12 +84,14 @@ public class LoginPanel extends JPanel {
         loginButton.addActionListener((ActionEvent e) -> {
             String id = idField.getText();
             String password = new String(passField.getPassword());
-            if (Auth.attemptLogin(id, password)) {
-                Session.getInstance().setCurrentUser(new model.User(id));
+            User user = Auth.attemptLogin(id, password);
+            if (user != null) {
+                Session.getInstance().setCurrentUser(user);
                 App.getInstance().setScreen(new MainPanel());
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid credentials!", "", JOptionPane.ERROR_MESSAGE);
             }
+
         });
 
         return formPanel;

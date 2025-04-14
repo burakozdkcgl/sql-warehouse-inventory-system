@@ -2,69 +2,107 @@ package db;
 
 import logic.ConfigManager;
 import logic.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.cfg.Configuration;
+import org.hibernate.service.ServiceRegistry;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+
 public class Database {
-    private static Connection connection;
 
+    private static SessionFactory sessionFactory;
+    private static Connection legacyConnection; // Optional JDBC fallback
 
-    public static void connect()
-            throws SQLException, ClassNotFoundException {
+    public static void connect() throws Exception {
         ConfigManager.DBConfig config = ConfigManager.getConfig();
 
-        String dbms = config.dbms;
-        String host = config.host;
-        String port = config.port;
-        String dbName = config.dbName;
-        String username = config.username;
-        String password = config.password;
+        if (sessionFactory != null) return;
 
-        if (connection == null || connection.isClosed()) {
-            String dbmsNormalized = dbms.trim().toLowerCase();
-            String url = switch (dbmsNormalized) {
-                case "postgresql" -> {
-                    Class.forName("org.postgresql.Driver");
-                    yield "jdbc:postgresql://" + host + ":" + port + "/" + dbName;
-                }
-                case "sqlserver" -> {
-                    Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-                    yield "jdbc:sqlserver://" + host + ":" + port + ";databaseName=" + dbName;
-                }
-                case "mysql" -> {
-                    Class.forName("com.mysql.cj.jdbc.Driver");
-                    yield "jdbc:mysql://" + host + ":" + port + "/" + dbName;
-                }
-                case "sqlite" -> {
-                    Class.forName("org.sqlite.JDBC");
-                    yield "jdbc:sqlite:" + dbName; // dbName is the path to the .db file
-                }
-                default -> throw new IllegalArgumentException("Unsupported DBMS type: " + dbms);
-            };
+        Configuration cfg = new Configuration();
 
-            System.out.println(dbms);
+        String dbms = config.dbms.toLowerCase().trim();
+        String dialect = switch (dbms) {
+            case "mysql" -> "org.hibernate.dialect.MySQLDialect";
+            case "postgresql" -> "org.hibernate.dialect.PostgreSQLDialect";
+            case "sqlserver" -> "org.hibernate.dialect.SQLServerDialect";
+            case "sqlite" -> "org.hibernate.community.dialect.SQLiteDialect";
+            default -> throw new IllegalArgumentException("Unsupported DBMS: " + dbms);
+        };
 
-            if ("sqlite".equals(dbmsNormalized)) {
-                connection = DriverManager.getConnection(url);
-            } else {
-                connection = DriverManager.getConnection(url, username, password);
-            }
+        cfg.setProperty("hibernate.connection.driver_class", getDriverClass(dbms));
+        cfg.setProperty("hibernate.connection.url", getJdbcUrl(config));
+        cfg.setProperty("hibernate.connection.username", config.username == null ? "" : config.username);
+        cfg.setProperty("hibernate.connection.password", config.password == null ? "" : config.password);
+        cfg.setProperty("hibernate.dialect", dialect);
+        cfg.setProperty("hibernate.hbm2ddl.auto", "update"); // or validate/create
+        cfg.setProperty("hibernate.show_sql", "true");
 
-            Session.getInstance().setDBMS(dbms);
-        }
+        // Register entity classes here:
+        cfg.addAnnotatedClass(entity.User.class);
+
+        ServiceRegistry registry = new StandardServiceRegistryBuilder()
+                .applySettings(cfg.getProperties())
+                .build();
+
+        sessionFactory = cfg.buildSessionFactory(registry);
+
+        Session.getInstance().setDBMS(config.dbms);
     }
 
-
-
-    public static Connection getConnection() {
-        return connection;
+    public static SessionFactory getSessionFactory() {
+        return sessionFactory;
     }
 
-    public static void close() throws SQLException {
-        if (connection != null && !connection.isClosed()) {
-            System.out.println("Connection closed");
-            connection.close();
+    // Optional JDBC connection (fallback)
+    public static Connection getConnection() throws SQLException {
+        if (legacyConnection != null && !legacyConnection.isClosed()) return legacyConnection;
+
+        ConfigManager.DBConfig config = ConfigManager.getConfig();
+        String dbms = config.dbms.toLowerCase().trim();
+
+        String url = switch (dbms) {
+            case "sqlite" -> "jdbc:sqlite:" + config.dbName;
+            case "mysql" -> "jdbc:mysql://" + config.host + ":" + config.port + "/" + config.dbName;
+            case "postgresql" -> "jdbc:postgresql://" + config.host + ":" + config.port + "/" + config.dbName;
+            case "sqlserver" -> "jdbc:sqlserver://" + config.host + ":" + config.port + ";databaseName=" + config.dbName;
+            default -> throw new IllegalArgumentException("Unsupported DBMS: " + dbms);
+        };
+
+        if ("sqlite".equals(dbms)) {
+            legacyConnection = DriverManager.getConnection(url);
+        } else {
+            legacyConnection = DriverManager.getConnection(url, config.username, config.password);
         }
+
+        return legacyConnection;
+    }
+
+    public static void close() throws Exception {
+        if (sessionFactory != null) sessionFactory.close();
+        if (legacyConnection != null && !legacyConnection.isClosed()) legacyConnection.close();
+    }
+
+    private static String getDriverClass(String dbms) {
+        return switch (dbms) {
+            case "mysql" -> "com.mysql.cj.jdbc.Driver";
+            case "postgresql" -> "org.postgresql.Driver";
+            case "sqlserver" -> "com.microsoft.sqlserver.jdbc.SQLServerDriver";
+            case "sqlite" -> "org.sqlite.JDBC";
+            default -> throw new IllegalArgumentException("Unsupported DBMS: " + dbms);
+        };
+    }
+
+    private static String getJdbcUrl(ConfigManager.DBConfig config) {
+        String dbms = config.dbms.toLowerCase().trim();
+        return switch (dbms) {
+            case "mysql" -> "jdbc:mysql://" + config.host + ":" + config.port + "/" + config.dbName;
+            case "postgresql" -> "jdbc:postgresql://" + config.host + ":" + config.port + "/" + config.dbName;
+            case "sqlserver" -> "jdbc:sqlserver://" + config.host + ":" + config.port + ";databaseName=" + config.dbName;
+            case "sqlite" -> "jdbc:sqlite:" + config.dbName;
+            default -> throw new IllegalArgumentException("Unsupported DBMS: " + dbms);
+        };
     }
 }

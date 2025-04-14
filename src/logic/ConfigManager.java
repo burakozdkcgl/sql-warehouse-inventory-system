@@ -9,14 +9,16 @@ public class ConfigManager {
 
     private static final DBConfig config = new DBConfig();
 
-    private static final boolean isSQLite = "SQLite".equalsIgnoreCase(config.dbms);
+    private static boolean isSQLite() {
+        return "SQLite".equalsIgnoreCase(config.dbms);
+    }
 
     public static void saveConfig(String dbms, String host, String port, String dbName, String user, String pass) {
         Properties props = new Properties();
         props.setProperty("dbms", dbms);
         props.setProperty("dbName", dbName);
 
-        if (!isSQLite) {
+        if (!isSQLite()) {
             if (config.host != null) props.setProperty("host", host);
             if (config.port != null) props.setProperty("port", port);
             if (config.username != null) props.setProperty("username", user);
@@ -53,7 +55,7 @@ public class ConfigManager {
     public static void fillConfig(String dbms, String host, String port, String dbName, String user, String pass) {
         config.dbms = dbms;
         config.dbName = dbName;
-        if (isSQLite) {
+        if (isSQLite()) {
             config.host = config.port = config.username = config.password = "null";
         } else {
             config.host = host;
@@ -67,10 +69,15 @@ public class ConfigManager {
         return config;
     }
 
+
+    //use Sessions' method instead of this one
+    //this is for launcher
     public static String getDBMS(){
         loadConfig();
         return config.dbms;
     }
+
+
     public static class DBConfig {
         public String dbms, host, port, dbName, username, password;
     }

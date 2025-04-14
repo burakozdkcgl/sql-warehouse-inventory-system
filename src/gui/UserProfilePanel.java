@@ -1,7 +1,7 @@
 package gui;
 
 import logic.App;
-import model.User;
+import entity.User;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,9 +26,6 @@ public class UserProfilePanel extends JPanel {
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
         centerPanel.setBorder(BorderFactory.createEmptyBorder(40, 20, 20, 20));
 
-        JLabel profilePic = new JLabel(new ImageIcon(user.getProfilePicture().getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH)));
-        profilePic.setAlignmentX(Component.CENTER_ALIGNMENT);
-        centerPanel.add(profilePic);
 
 
         // Spacer
@@ -36,11 +33,11 @@ public class UserProfilePanel extends JPanel {
 
         // Info panel with styled labels
         JLabel usernameLabel = createStyledLabel("Username: " + user.getId());
-        JLabel roleLabel = createStyledLabel("Role: " + user.getRole());
+
 
         centerPanel.add(usernameLabel);
         centerPanel.add(Box.createVerticalStrut(10));
-        centerPanel.add(roleLabel);
+
 
         add(centerPanel, BorderLayout.CENTER);
 
