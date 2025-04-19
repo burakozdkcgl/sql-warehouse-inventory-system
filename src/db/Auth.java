@@ -5,11 +5,11 @@ import org.hibernate.Session;
 
 public class Auth {
 
-    public static User attemptLogin(String id, String password) {
+    public static User attemptLogin(String username, String password) {
         try (Session session = Database.getSessionFactory().openSession()) {
             return session.createQuery(
-                            "FROM User WHERE username = :id AND password = :pass", User.class)
-                    .setParameter("id", id)
+                            "FROM User WHERE username = :username AND password = :pass", User.class)
+                    .setParameter("username", username)
                     .setParameter("pass", password)
                     .uniqueResult();
         } catch (Exception e) {

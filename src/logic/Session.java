@@ -29,12 +29,12 @@ public class Session {
         this.DBMS = dbms;
     }
 
-    public String getDBMS() {
+    public String getCurrentDBMS() {
         return DBMS;
     }
 
-    public void setFullscreen(boolean turufols){
-        this.isFullscreen = turufols;
+    public void setFullscreen(boolean isFullscreen){
+        this.isFullscreen = isFullscreen;
     }
 
     public boolean isFullscreen(){

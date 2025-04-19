@@ -67,6 +67,16 @@ public class MainPanel extends JPanel {
             
         }
 
+        JButton logoutButton = new JButton("Logout");
+        logoutButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        logoutButton.addActionListener(e -> {
+            Session.getInstance().setCurrentUser(null); // Clear the session
+            App.getInstance().setScreen(new LoginPanel()); // Return to login screen
+        });
+        menuPanel.add(Box.createVerticalStrut(20)); // Extra space before logout
+        menuPanel.add(logoutButton);
+
+
         whiteBox.add(menuPanel, BorderLayout.WEST);
 
         // Content placeholder

@@ -16,7 +16,7 @@ public class Database {
     private static SessionFactory sessionFactory;
     private static Connection legacyConnection; // Optional JDBC fallback
 
-    public static void connect() throws Exception {
+    public static void connect() {
         ConfigManager.DBConfig config = ConfigManager.getConfig();
 
         if (sessionFactory != null) return;
