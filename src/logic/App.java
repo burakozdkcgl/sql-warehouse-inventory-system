@@ -1,5 +1,8 @@
 package logic;
 
+import gui.LoginPanel;
+import gui.NavigationPanel;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -65,6 +68,12 @@ public class App extends JFrame {
     public void setScreen(JPanel screen) {
         root.removeAll();
 
+        // Automatically wrap with NavigationPanel, except for login & splash
+        if (!(screen instanceof LoginPanel || screen instanceof SplashScreen) &&
+                !(screen instanceof NavigationPanel)) {
+            screen = new NavigationPanel(screen);
+        }
+
         JPanel wrapped = new AspectRatioPanel(3.0 / 2.0, screen);
         root.add(wrapped, BorderLayout.CENTER);
 
@@ -120,6 +129,7 @@ public class App extends JFrame {
             this.content = content;
             setLayout(null); // manual layout for centering
             add(content);
+            setOpaque(false);
         }
 
         @Override
@@ -136,6 +146,8 @@ public class App extends JFrame {
             int x = (size.width - w) / 2;
             int y = (size.height - h) / 2;
             content.setBounds(x, y, w, h);
+            content.revalidate();
+            content.repaint();
         }
     }
 

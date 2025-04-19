@@ -44,7 +44,7 @@ public class User {
 
     // Picture from user_pictures table
     @Lob
-    @Column(table = "user_pictures", name = "user_picture")
+    @Column(table = "user_pictures", name = "user_picture", columnDefinition = "MEDIUMBLOB")
     private byte[] picture;
 
     // Self-referencing manager_id from user_managers table

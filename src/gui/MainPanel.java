@@ -31,7 +31,7 @@ public class MainPanel extends JPanel {
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
                 new EmptyBorder(20, 20, 20, 20)
         ));
-        whiteBox.setPreferredSize(new Dimension(500, 400));
+        whiteBox.setPreferredSize(new Dimension(950, 620));
 
         // Header with user welcome
         JLabel welcomeLabel = new JLabel("Welcome, " + user.getId(), SwingConstants.CENTER);
@@ -44,28 +44,27 @@ public class MainPanel extends JPanel {
         menuPanel.setOpaque(false);
         menuPanel.setBorder(new EmptyBorder(0, 0, 0, 10));
 
-        String[] menuItems = {"Dashboard", "Profile", "Settings"};
-        for (String item : menuItems) {
-            JButton menuButton = new JButton(item);
-            menuButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-            menuPanel.add(menuButton);
-            menuPanel.add(Box.createVerticalStrut(10));
-            menuButton.addActionListener(e -> {
-                App app = App.getInstance();
-                switch (item) {
-                    case "Profile":
-                        app.setScreen(new UserProfilePanel(Session.getInstance().getCurrentUser()));
-                        break;
-                    case "Settings":
-                        app.setScreen(new SettingsPanel());
-                        break;
-                    default:
-                        JOptionPane.showMessageDialog(this, item + " is under construction!");
-                        break;
-                }
-            });
-            
-        }
+
+        JButton itemListButton = new JButton("View Items");
+        itemListButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        itemListButton.addActionListener(e -> App.getInstance().setScreen(new ItemListPanel()));
+        menuPanel.add(itemListButton);
+        menuPanel.add(Box.createVerticalStrut(10));
+
+        JButton inventoryButton = new JButton("View Inventory");
+        inventoryButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        inventoryButton.addActionListener(e -> {
+            App.getInstance().setScreen(new InventoryPanel());
+        });
+        menuPanel.add(inventoryButton);
+        menuPanel.add(Box.createVerticalStrut(10));
+
+        JButton userListButton = new JButton("View Users");
+        userListButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        userListButton.addActionListener(e -> {
+            App.getInstance().setScreen(new UserListPanel());
+        });
+        menuPanel.add(userListButton);
 
         JButton logoutButton = new JButton("Logout");
         logoutButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -85,7 +84,6 @@ public class MainPanel extends JPanel {
         contentPanel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
         contentPanel.add(new JLabel("Content Area"));
         whiteBox.add(contentPanel, BorderLayout.CENTER);
-
 
 
         add(whiteBox);
