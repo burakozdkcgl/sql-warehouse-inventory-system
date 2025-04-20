@@ -12,6 +12,13 @@ import logic.Session;
 
 public class LoginPanel extends JPanel {
 
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Image bg = new ImageIcon(getClass().getResource("/background.png")).getImage();
+        g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
+    }
+
     public LoginPanel() {
 
         setLayout(new BorderLayout());
@@ -90,7 +97,7 @@ public class LoginPanel extends JPanel {
                 Session.getInstance().setCurrentUser(user);
                 App.getInstance().setScreen(new MainPanel());
             } else {
-                NotificationPanel.show(App.getInstance().getLayeredPane(), "Invalid credentials!", 3000);
+                NotificationPanel.show(App.getInstance().getLayeredPane(), "Invalid credentials!", 3000, "red");
 
             }
 
@@ -113,10 +120,4 @@ public class LoginPanel extends JPanel {
         button.setFocusPainted(false);
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Image bg = new ImageIcon(getClass().getResource("/background_login.png")).getImage();
-        g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
-    }
 }

@@ -8,29 +8,6 @@ CREATE TABLE `users` (
   UNIQUE KEY `username` (`username`)
 );
 
-CREATE TABLE `user_passwords` (
-  `user_id` int NOT NULL,
-  `password` varchar(255) NOT NULL,
-  PRIMARY KEY (`user_id`),
-  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-);
-
-CREATE TABLE `user_managers` (
-  `user_id` int NOT NULL,
-  `manager_id` int DEFAULT NULL,
-  PRIMARY KEY (`user_id`),
-  KEY `manager_id` (`manager_id`),
-  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`manager_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-);
-
-CREATE TABLE `user_pictures` (
-  `user_id` int NOT NULL,
-  `user_picture` MEDIUMBLOB DEFAULT NULL,
-  PRIMARY KEY (`user_id`),
-  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-);
-
 CREATE TABLE `warehouses` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
@@ -60,6 +37,28 @@ CREATE TABLE inventory (
   FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
 );
 
+CREATE TABLE `user_passwords` (
+  `user_id` int NOT NULL,
+  `password` varchar(255) NOT NULL,
+  PRIMARY KEY (`user_id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+);
+
+CREATE TABLE `user_managers` (
+  `user_id` int NOT NULL,
+  `manager_id` int DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  KEY `manager_id` (`manager_id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  FOREIGN KEY (`manager_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+);
+
+CREATE TABLE `user_pictures` (
+  `user_id` int NOT NULL,
+  `user_picture` MEDIUMBLOB DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+);
 
 
 

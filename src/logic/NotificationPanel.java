@@ -7,43 +7,40 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class NotificationPanel extends JPanel {
-    private static final NotificationPanel INSTANCE = new NotificationPanel();
     private final JLabel messageLabel;
 
-    private NotificationPanel() {
+    public NotificationPanel(String message,String colour) {
         setLayout(new BorderLayout());
         setOpaque(false);
 
-        messageLabel = new JLabel("", SwingConstants.CENTER);
+        messageLabel = new JLabel(message, SwingConstants.CENTER);
         messageLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         messageLabel.setForeground(Color.WHITE);
         messageLabel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
 
-        setBackground(new Color(255, 50, 50)); // same as above, fully opaque
+        if(colour.equals("red")) setBackground(new Color(255, 50, 50));
+        if(colour.equals("green")) setBackground(new Color(0, 119, 0));
         add(messageLabel, BorderLayout.CENTER);
     }
 
-    public static void show(JComponent parent, String message, int durationMillis) {
-        INSTANCE.messageLabel.setText(message);
-
-        Dimension size = INSTANCE.getPreferredSize();
+    public void showOn(JLayeredPane parent, int durationMillis) {
         int width = 300;
         int height = 40;
         int x = parent.getWidth() - width - 20;
         int y = 20;
 
-        INSTANCE.setBounds(x, y, width, height);
-        INSTANCE.setVisible(true);
+        setBounds(x, y, width, height);
+        setVisible(true);
 
-        parent.add(INSTANCE, JLayeredPane.POPUP_LAYER);
+        parent.add(this, JLayeredPane.POPUP_LAYER);
         parent.revalidate();
         parent.repaint();
 
-        // Auto-hide timer
+        // Auto-hide
         new Timer().schedule(new TimerTask() {
             public void run() {
                 SwingUtilities.invokeLater(() -> {
-                    parent.remove(INSTANCE);
+                    parent.remove(NotificationPanel.this);
                     parent.revalidate();
                     parent.repaint();
                 });
@@ -68,5 +65,11 @@ public class NotificationPanel extends JPanel {
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(300, 40);
+    }
+
+    // 🔥 Cleaner API usage
+    public static void show(JComponent parent, String message, int durationMillis, String colour) {
+        NotificationPanel panel = new NotificationPanel(message,colour);
+        panel.showOn((JLayeredPane) parent, durationMillis);
     }
 }

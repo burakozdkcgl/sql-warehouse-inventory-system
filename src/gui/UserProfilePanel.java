@@ -4,6 +4,7 @@ import db.Database;
 import entity.User;
 import logic.App;
 import logic.Session;
+import org.hibernate.query.Query;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -12,33 +13,51 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
+import java.util.List;
 
 public class UserProfilePanel extends JPanel {
 
+
     private User user;
+    private final boolean isAdmin;
+    private boolean isEditing = false;
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Image bg = new ImageIcon(getClass().getResource("/test1.png")).getImage();
-        g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
-    }
+    private final JTextField nameField;
+    private final JTextField usernameField;
+    private final JTextField emailField;
+    private final JPasswordField passwordField;
+    private final JLabel avatarLabel;
+    private final JButton changePicButton;
+    private final JButton removePicButton;
+    private final JButton saveButton;
+    private JButton editBackButton;
 
+    private final JPanel passwordPanel;
+    private final JComboBox<User> managerComboBox;
+    private final JLabel managerLabelDisplay;
+
+    private byte[] selectedPicture;
+
+    Image profile_default = new ImageIcon(getClass().getResource("/profile_default.png")).getImage();
+    InputStream profile_default_stream = getClass().getResourceAsStream("/profile_default.png");
     public UserProfilePanel(User user) {
         this.user = user;
+        selectedPicture = user.getPicture();
         User currentUser = Session.getInstance().getCurrentUser();
-        boolean canEdit = currentUser != null && (currentUser.getId().equals(user.getId()) ||
-                "admin".equalsIgnoreCase(currentUser.getRole()));
+        isAdmin = currentUser != null && "admin".equalsIgnoreCase(currentUser.getRole());
+        boolean isSelf = currentUser != null && currentUser.getId().equals(user.getId());
+
 
         setLayout(new GridBagLayout());
         setOpaque(false);
 
-        JPanel whiteBox = new JPanel();
-        whiteBox.setLayout(new BoxLayout(whiteBox, BoxLayout.Y_AXIS));
-        whiteBox.setBackground(Color.WHITE);
-        whiteBox.setPreferredSize(new Dimension(500, 540));
-        whiteBox.setBorder(BorderFactory.createCompoundBorder(
+        JPanel box = new JPanel();
+        box.setLayout(new BoxLayout(box, BoxLayout.Y_AXIS));
+        box.setBackground(Color.WHITE);
+        box.setPreferredSize(new Dimension(500, 540));
+        box.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
                 new EmptyBorder(30, 30, 30, 30)
         ));
@@ -46,66 +65,212 @@ public class UserProfilePanel extends JPanel {
         JLabel title = new JLabel("User Profile", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 22));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
-        whiteBox.add(title);
-        whiteBox.add(Box.createVerticalStrut(20));
+        box.add(title);
+        box.add(Box.createVerticalStrut(20));
 
-        JLabel avatarLabel = createAvatarLabel(user);
-        whiteBox.add(avatarLabel);
-        whiteBox.add(Box.createVerticalStrut(10));
+        avatarLabel = createAvatarLabel(user);
+        box.add(avatarLabel);
+        box.add(Box.createVerticalStrut(10));
 
-        if (canEdit) {
-            JButton changePicButton = createButton("Change Picture");
-            changePicButton.addActionListener(e -> handleChangePicture(avatarLabel));
-            whiteBox.add(changePicButton);
-            whiteBox.add(Box.createVerticalStrut(20));
-        }
 
-        JTextField usernameField = createTextField(user.getUsername(), canEdit);
-        whiteBox.add(createFieldPanel("Username", usernameField));
 
-        JTextField emailField = createTextField(user.getEmail(), canEdit);
-        whiteBox.add(createFieldPanel("Email", emailField));
-
-        JPasswordField passwordField = new JPasswordField(user.getPassword());
-        passwordField.setEnabled(canEdit);
+        nameField = createTextField(user.getName());
+        usernameField = createTextField(user.getUsername());
+        emailField = createTextField(user.getEmail());
+        passwordField = new JPasswordField(user.getPassword());
         passwordField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         passwordField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        whiteBox.add(createFieldPanel("Password", passwordField));
 
-        whiteBox.add(Box.createVerticalStrut(20));
+        box.add(createFieldPanel("Name:", nameField));
+        box.add(createFieldPanel("Username:", usernameField));
+        box.add(createFieldPanel("Email:", emailField));
 
-        if (canEdit) {
-            JButton saveButton = createButton("Save Changes");
-            saveButton.addActionListener(e -> {
-                user.setUsername(usernameField.getText());
-                user.setEmail(emailField.getText());
-                user.setPassword(new String(passwordField.getPassword()));
+        passwordPanel = createFieldPanel("Password:", passwordField);
+        box.add(passwordPanel);
 
-                try (org.hibernate.Session session = Database.getSessionFactory().openSession()) {
-                    session.beginTransaction();
-                    session.update(user);
-                    session.getTransaction().commit();
-                    JOptionPane.showMessageDialog(this, "Profile updated successfully!");
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    JOptionPane.showMessageDialog(this, "Error saving user.");
-                }
-            });
-            whiteBox.add(saveButton);
-            whiteBox.add(Box.createVerticalStrut(10));
+        JPanel managerPanel = new JPanel(new BorderLayout(10, 5));
+        managerPanel.setOpaque(false);
+        JLabel mgrLabel = new JLabel("Manager:");
+        mgrLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        mgrLabel.setPreferredSize(new Dimension(100, 30));
+
+        managerComboBox = new JComboBox<>();
+        managerComboBox.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        managerComboBox.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+
+        managerLabelDisplay = new JLabel();
+        managerLabelDisplay.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
+        User manager = user.getManager();
+        String mgrText = (manager != null) ? manager.getName() + " (" + manager.getUsername() + ")" : "None";
+        managerLabelDisplay.setText(mgrText);
+
+        boolean hasPicture;
+        try {
+            hasPicture = !(user.getPicture() == profile_default_stream.readAllBytes());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
 
-        add(whiteBox);
+        if (isAdmin) {
+            loadManagers();
+            managerComboBox.setSelectedItem(manager);
+            managerPanel.add(mgrLabel, BorderLayout.WEST);
+            managerPanel.add(new JPanel(new CardLayout()) {{
+                add(managerComboBox, "edit");
+                add(managerLabelDisplay, "view");
+            }}, BorderLayout.CENTER);
+        } else {
+            managerPanel.add(mgrLabel, BorderLayout.WEST);
+            managerPanel.add(managerLabelDisplay, BorderLayout.CENTER);
+        }
+
+        managerPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
+        box.add(managerPanel);
+
+        box.add(Box.createVerticalStrut(20));
+
+        removePicButton = createButton("Remove Picture");
+        removePicButton.addActionListener(e -> handleRemovePicture(avatarLabel));
+        if(hasPicture){
+            box.add(removePicButton);
+            box.add(Box.createVerticalStrut(10));
+        }
+
+
+        changePicButton = createButton("Change Picture");
+        changePicButton.addActionListener(e -> handleChangePicture(avatarLabel));
+        box.add(changePicButton);
+        box.add(Box.createVerticalStrut(10));
+
+        saveButton = createButton("Save Changes");
+        saveButton.addActionListener(e -> saveChanges());
+        box.add(saveButton);
+
+        if (isSelf || isAdmin) {
+            editBackButton = createButton("Edit Profile");
+            editBackButton.addActionListener(e -> toggleEditMode());
+            box.add(Box.createVerticalStrut(10));
+            box.add(editBackButton);
+        }
+
+        disableEditing();
+        add(box);
+    }
+
+
+
+    private void toggleEditMode() {
+        isEditing = !isEditing;
+
+        if (isEditing) {
+            enableEditing();
+            editBackButton.setText("Back");
+        } else {
+            disableEditing();
+            App.getInstance().setScreen(new UserProfilePanel(user));
+        }
+    }
+
+    private void enableEditing() {
+        nameField.setEditable(true);
+        usernameField.setEditable(true);
+        emailField.setEditable(true);
+        passwordPanel.setVisible(true);
+        changePicButton.setVisible(true);
+        removePicButton.setVisible(true);
+        saveButton.setVisible(true);
+        if (isAdmin) {
+            managerComboBox.setEnabled(true);
+            managerComboBox.setVisible(true);
+            managerLabelDisplay.setVisible(false);
+        } else {
+            managerComboBox.setVisible(false);
+            managerLabelDisplay.setVisible(true);
+        }
+    }
+
+    private void disableEditing() {
+        nameField.setEditable(false);
+        usernameField.setEditable(false);
+        emailField.setEditable(false);
+        passwordPanel.setVisible(false);
+        changePicButton.setVisible(false);
+        removePicButton.setVisible(false);
+        saveButton.setVisible(false);
+        if (isAdmin) {
+            managerComboBox.setEnabled(false);
+        }
+        managerComboBox.setVisible(false);
+        managerLabelDisplay.setVisible(true);
+    }
+
+    private void saveChanges() {
+        user.setName(nameField.getText());
+        user.setUsername(usernameField.getText());
+        user.setEmail(emailField.getText());
+        user.setPassword(new String(passwordField.getPassword()));
+        if (isAdmin) user.setManager((User) managerComboBox.getSelectedItem());
+        user.setPicture(selectedPicture);
+
+
+
+        try (org.hibernate.Session session = Database.getSessionFactory().openSession()) {
+
+
+
+            session.beginTransaction();
+
+            try {
+                if(java.util.Arrays.equals(selectedPicture, profile_default_stream.readAllBytes())){
+                    user.setPicture(null);
+
+                    System.out.println("za");
+
+                    session.createNativeQuery("DELETE FROM user_pictures WHERE user_id = :userId")
+                            .setParameter("userId", user.getId())
+                            .executeUpdate();
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
+
+
+            session.update(user);
+            session.getTransaction().commit();
+            logic.NotificationPanel.show(App.getInstance().getLayeredPane(), "Profile updated successfully!", 3000,"green");
+            App.getInstance().setScreen(new UserProfilePanel(user));
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error saving user.");
+        }
+    }
+
+    private void loadManagers() {
+        try (org.hibernate.Session session = Database.getSessionFactory().openSession()) {
+            Query<User> query = session.createQuery("FROM User WHERE role = 'manager'", User.class);
+            List<User> managers = query.list();
+            managerComboBox.addItem(null);
+            for (User manager : managers) {
+                managerComboBox.addItem(manager);
+            }
+        }
     }
 
     private JLabel createAvatarLabel(User user) {
         byte[] imageBytes = user.getPicture();
         Image avatarImage;
-        try {
-            avatarImage = ImageIO.read(new ByteArrayInputStream(imageBytes));
-        } catch (IOException e) {
-            avatarImage = new BufferedImage(100, 100, BufferedImage.TYPE_INT_ARGB);
+
+        if (imageBytes == null || imageBytes.length == 0) {
+            avatarImage = profile_default;
+        } else {
+            try {
+                avatarImage = ImageIO.read(new ByteArrayInputStream(imageBytes));
+            } catch (IOException e) {
+                avatarImage = profile_default;
+            }
         }
 
         Image scaled = avatarImage.getScaledInstance(100, 100, Image.SCALE_SMOOTH);
@@ -119,7 +284,7 @@ public class UserProfilePanel extends JPanel {
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
             try {
                 BufferedImage img = ImageIO.read(chooser.getSelectedFile());
-                user.setPicture(Files.readAllBytes(chooser.getSelectedFile().toPath()));
+                selectedPicture = Files.readAllBytes(chooser.getSelectedFile().toPath());
                 avatarLabel.setIcon(new ImageIcon(img.getScaledInstance(100, 100, Image.SCALE_SMOOTH)));
             } catch (IOException ex) {
                 ex.printStackTrace();
@@ -127,24 +292,35 @@ public class UserProfilePanel extends JPanel {
         }
     }
 
-    private JTextField createTextField(String text, boolean editable) {
+    private void handleRemovePicture(JLabel avatarLabel) {
+
+        avatarLabel.setIcon(new ImageIcon(profile_default.getScaledInstance(100, 100, Image.SCALE_SMOOTH)));
+        try {
+            selectedPicture = profile_default_stream.readAllBytes();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    private JTextField createTextField(String text) {
         JTextField field = new JTextField(text);
-        field.setEnabled(editable);
         field.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         field.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
         return field;
     }
 
     private JPanel createFieldPanel(String labelText, JComponent field) {
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        JPanel panel = new JPanel(new BorderLayout(10, 5));
         panel.setOpaque(false);
+
         JLabel label = new JLabel(labelText);
         label.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        label.setAlignmentX(Component.LEFT_ALIGNMENT);
-        panel.add(label);
-        panel.add(field);
-        panel.add(Box.createVerticalStrut(10));
+        label.setPreferredSize(new Dimension(100, 30));
+
+        panel.add(label, BorderLayout.WEST);
+        panel.add(field, BorderLayout.CENTER);
+        panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
         return panel;
     }
 

@@ -35,6 +35,14 @@ public class NavigationPanel extends JPanel {
         navContainer.add(createNavButton("Dashboard", () ->
                 App.getInstance().setScreen(new MainPanel())));
 
+        navContainer.add(createNavButton("Inventory", () ->
+                App.getInstance().setScreen(new InventoryPanel())));
+
+        navContainer.add(createNavButton("Item List", () ->
+                App.getInstance().setScreen(new ItemListPanel())));
+
+        navContainer.add(createNavButton("User List", () ->
+                App.getInstance().setScreen(new UserListPanel())));
 
         navContainer.add(createNavButton("Settings", () ->
                 App.getInstance().setScreen(new SettingsPanel())));

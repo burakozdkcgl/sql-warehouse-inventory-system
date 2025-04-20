@@ -9,12 +9,7 @@ import java.awt.*;
 
 public class SettingsPanel extends JPanel {
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Image bg = new ImageIcon(getClass().getResource("/test1.png")).getImage(); // consistent with others
-        g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
-    }
+
 
     public SettingsPanel() {
         setLayout(new GridBagLayout());
@@ -23,7 +18,7 @@ public class SettingsPanel extends JPanel {
         JPanel whiteBox = new JPanel();
         whiteBox.setLayout(new BoxLayout(whiteBox, BoxLayout.Y_AXIS));
         whiteBox.setBackground(Color.WHITE);
-        whiteBox.setPreferredSize(new Dimension(500, 400));
+        whiteBox.setPreferredSize(new Dimension(500, 540));
         whiteBox.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1),
                 new EmptyBorder(30, 30, 30, 30)
@@ -52,8 +47,18 @@ public class SettingsPanel extends JPanel {
             App.getInstance().setScreen(new LoginPanel());
         });
         whiteBox.add(logoutButton);
+        whiteBox.add(Box.createVerticalStrut(20));
 
-
+        JButton exitButton = createButton("Exit App");
+        exitButton.addActionListener(e -> {
+            try {
+                db.Database.close();
+            } catch (Exception ex) {
+                logic.ErrorLogger.log(ex);
+            }
+            System.exit(0);
+        });
+        whiteBox.add(exitButton);
 
 
 

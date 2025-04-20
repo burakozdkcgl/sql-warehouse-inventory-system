@@ -7,14 +7,9 @@ import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-
 public class Database {
 
     private static SessionFactory sessionFactory;
-    private static Connection legacyConnection; // Optional JDBC fallback
 
     public static void connect() {
         ConfigManager.DBConfig config = ConfigManager.getConfig();
@@ -59,33 +54,10 @@ public class Database {
         return sessionFactory;
     }
 
-    // Optional JDBC connection (fallback)
-    public static Connection getConnection() throws SQLException {
-        if (legacyConnection != null && !legacyConnection.isClosed()) return legacyConnection;
 
-        ConfigManager.DBConfig config = ConfigManager.getConfig();
-        String dbms = config.dbms.toLowerCase().trim();
-
-        String url = switch (dbms) {
-            case "sqlite" -> "jdbc:sqlite:" + config.dbName;
-            case "mysql" -> "jdbc:mysql://" + config.host + ":" + config.port + "/" + config.dbName;
-            case "postgresql" -> "jdbc:postgresql://" + config.host + ":" + config.port + "/" + config.dbName;
-            case "sqlserver" -> "jdbc:sqlserver://" + config.host + ":" + config.port + ";databaseName=" + config.dbName;
-            default -> throw new IllegalArgumentException("Unsupported DBMS: " + dbms);
-        };
-
-        if ("sqlite".equals(dbms)) {
-            legacyConnection = DriverManager.getConnection(url);
-        } else {
-            legacyConnection = DriverManager.getConnection(url, config.username, config.password);
-        }
-
-        return legacyConnection;
-    }
 
     public static void close() throws Exception {
         if (sessionFactory != null) sessionFactory.close();
-        if (legacyConnection != null && !legacyConnection.isClosed()) legacyConnection.close();
     }
 
     private static String getDriverClass(String dbms) {

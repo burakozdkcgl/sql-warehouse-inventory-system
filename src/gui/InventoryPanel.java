@@ -5,7 +5,6 @@ import entity.Inventory;
 import entity.Item;
 import entity.Warehouse;
 import jakarta.persistence.TypedQuery;
-import logic.App;
 import org.hibernate.Session;
 
 import javax.swing.*;
@@ -16,13 +15,6 @@ import java.awt.*;
 import java.util.List;
 
 public class InventoryPanel extends JPanel {
-
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Image bg = new ImageIcon(getClass().getResource("/test1.png")).getImage();
-        g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
-    }
 
     public InventoryPanel() {
         setLayout(new GridBagLayout());
@@ -56,14 +48,14 @@ public class InventoryPanel extends JPanel {
                         new EmptyBorder(10, 10, 10, 10)
                 ));
 
-                JLabel warehouseLabel = new JLabel("Warehouse #" + warehouse.getId());
+                JLabel warehouseLabel = new JLabel("Warehouse: " + warehouse.getName());
                 warehouseLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
                 warehouseLabel.setForeground(new Color(60, 60, 60));
                 warehousePanel.add(warehouseLabel, BorderLayout.NORTH);
 
                 DefaultTableModel model = new DefaultTableModel();
                 model.setColumnIdentifiers(new String[]{
-                        "Item ID", "Item Name", "SKU", "Category", "Quantity", "Reorder Level"
+                        "Category", "SKU", "Item Name", "Quantity", "Reorder Level"
                 });
 
                 TypedQuery<Inventory> inventoryQuery = session.createQuery(
@@ -73,8 +65,8 @@ public class InventoryPanel extends JPanel {
                 for (Inventory inventory : inventoryQuery.getResultList()) {
                     Item item = session.get(Item.class, inventory.getItemId());
                     model.addRow(new Object[]{
-                            item.getId(), item.getName(), item.getSku(),
-                            item.getCategory(), inventory.getQuantity(), inventory.getReorderLevel()
+                            item.getCategory(), item.getSku(), item.getName(),
+                             inventory.getQuantity(), inventory.getReorderLevel()
                     });
                 }
 
@@ -108,19 +100,12 @@ public class InventoryPanel extends JPanel {
         JScrollPane inventoryScrollPane = new JScrollPane(contentPanel);
         inventoryScrollPane.setBorder(null);
         whiteBox.add(inventoryScrollPane, BorderLayout.CENTER);
+        whiteBox.add(Box.createVerticalStrut(20), BorderLayout.SOUTH);
 
-        JButton backButton = new JButton("← Back");
-        backButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        backButton.setBackground(new Color(220, 220, 220));
-        backButton.setFocusPainted(false);
-        backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        backButton.addActionListener(e -> App.getInstance().setScreen(new MainPanel()));
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttonPanel.setOpaque(false);
-        buttonPanel.add(backButton);
-        whiteBox.add(buttonPanel, BorderLayout.SOUTH);
-
-        add(whiteBox);
+        JScrollPane scrollPane = new JScrollPane(whiteBox);
+        scrollPane.setBorder(null); // optional: no outer border
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16); // smooth scroll
+        add(scrollPane);
     }
 }

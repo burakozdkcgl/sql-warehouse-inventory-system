@@ -15,12 +15,6 @@ import java.util.List;
 
 public class UserListPanel extends JPanel {
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        Image bg = new ImageIcon(getClass().getResource("/test1.png")).getImage();
-        g.drawImage(bg, 0, 0, getWidth(), getHeight(), this);
-    }
 
     public UserListPanel() {
         setLayout(new GridBagLayout());
@@ -57,18 +51,7 @@ public class UserListPanel extends JPanel {
         JScrollPane scrollPane = new JScrollPane(userPanel);
         scrollPane.setBorder(null);
         whiteBox.add(scrollPane, BorderLayout.CENTER);
-
-        JButton backButton = new JButton("← Back");
-        backButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        backButton.setBackground(new Color(220, 220, 220));
-        backButton.setFocusPainted(false);
-        backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        backButton.addActionListener(e -> App.getInstance().setScreen(new MainPanel()));
-
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttonPanel.setOpaque(false);
-        buttonPanel.add(backButton);
-        whiteBox.add(buttonPanel, BorderLayout.SOUTH);
+        whiteBox.add(Box.createVerticalStrut(20), BorderLayout.SOUTH);
 
 
         add(whiteBox);

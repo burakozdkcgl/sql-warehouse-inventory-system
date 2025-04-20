@@ -1,3 +1,4 @@
+import db.Auth;
 import db.Database;
 import entity.User;
 import logic.App;
@@ -20,13 +21,14 @@ public class Test {
                     testUser = session.get(User.class, 2);
                 }
 
-                if (testUser == null) {
-                    System.err.println("User with ID 2 not found.");
-                    return;
-                }
 
                 Session.getInstance().setFullscreen(false);
                 Session.getInstance().setCurrentUser(testUser);
+
+                Session.getInstance().setCurrentUser(testUser);
+                // Right after this, force reload using Auth
+                User loginUser = Auth.attemptLogin(testUser.getUsername(), testUser.getPassword());
+                Session.getInstance().setCurrentUser(loginUser);
 
                 App app = new App();
 

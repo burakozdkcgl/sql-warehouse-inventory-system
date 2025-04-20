@@ -18,12 +18,14 @@ public class App extends JFrame {
 
 
 
+
     public App() {
         instance = this;
         setTitle("Warehouse Inventory System");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setContentPane(root); // root handles screen changes
         setBackground(Color.BLACK);
+
 
 
         setLocationRelativeTo(null);
@@ -68,17 +70,36 @@ public class App extends JFrame {
     public void setScreen(JPanel screen) {
         root.removeAll();
 
-        // Automatically wrap with NavigationPanel, except for login & splash
-        if (!(screen instanceof LoginPanel || screen instanceof SplashScreen) &&
-                !(screen instanceof NavigationPanel)) {
+        boolean isSplash = screen instanceof SplashScreen;
+        boolean isLogin = screen instanceof LoginPanel;
+
+        if (!isSplash && !isLogin && !(screen instanceof NavigationPanel)) {
             screen = new NavigationPanel(screen);
         }
 
-        JPanel wrapped = new AspectRatioPanel(3.0 / 2.0, screen);
-        root.add(wrapped, BorderLayout.CENTER);
+        JPanel wrapped = new AspectRatioPanel(3.0 / 2.0,
+                isSplash ? screen : wrapWithBackground(screen, "/background.png"));
 
+        root.add(wrapped, BorderLayout.CENTER);
         root.revalidate();
         root.repaint();
+    }
+
+    private JPanel wrapWithBackground(JPanel content, String imagePath) {
+        return new JPanel() {
+            private final Image background = new ImageIcon(getClass().getResource(imagePath)).getImage();
+
+            {
+                setLayout(new BorderLayout());
+                add(content, BorderLayout.CENTER);
+            }
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                g.drawImage(background, 0, 0, getWidth(), getHeight(), this);
+            }
+        };
     }
 
 
