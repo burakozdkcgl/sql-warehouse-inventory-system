@@ -27,7 +27,6 @@ public class App extends JFrame {
         setBackground(Color.BLACK);
 
 
-
         setLocationRelativeTo(null);
 
         // Show the window first (temporarily undecorated if needed)
@@ -78,16 +77,16 @@ public class App extends JFrame {
         }
 
         JPanel wrapped = new AspectRatioPanel(3.0 / 2.0,
-                isSplash ? screen : wrapWithBackground(screen, "/background.png"));
+                isSplash ? screen : wrapWithBackground(screen));
 
         root.add(wrapped, BorderLayout.CENTER);
         root.revalidate();
         root.repaint();
     }
 
-    private JPanel wrapWithBackground(JPanel content, String imagePath) {
+    private JPanel wrapWithBackground(JPanel content) {
         return new JPanel() {
-            private final Image background = new ImageIcon(getClass().getResource(imagePath)).getImage();
+            private final Image background = new ImageIcon(getClass().getResource("/background.png")).getImage();
 
             {
                 setLayout(new BorderLayout());

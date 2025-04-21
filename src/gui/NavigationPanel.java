@@ -1,9 +1,11 @@
 package gui;
 
 import logic.App;
+import logic.Session;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Objects;
 
 public class NavigationPanel extends JPanel {
 
@@ -29,11 +31,28 @@ public class NavigationPanel extends JPanel {
         navContainer.setOpaque(true);
         navContainer.setBackground(Color.WHITE);
         navContainer.setLayout(new FlowLayout(FlowLayout.CENTER, 20, 10));
-        navContainer.setMaximumSize(new Dimension(800, 60)); // This keeps the nav bar narrow
+        navContainer.setMaximumSize(new Dimension(920, 60)); // This keeps the nav bar narrow
         navContainer.setAlignmentX(Component.CENTER_ALIGNMENT); // Center it horizontally
 
         navContainer.add(createNavButton("Dashboard", () ->
                 App.getInstance().setScreen(new MainPanel())));
+
+        if  (Objects.equals(Session.getInstance().getCurrentUser().getRole(), "admin") ||
+                Objects.equals(Session.getInstance().getCurrentUser().getRole(), "manager")
+        ){
+            navContainer.add(createNavButton("Manage", () ->
+                    App.getInstance().setScreen(new ManagePanel())));
+        }
+
+        if  (Objects.equals(Session.getInstance().getCurrentUser().getRole(), "admin") ||
+                Objects.equals(Session.getInstance().getCurrentUser().getRole(), "manager") ||
+            Objects.equals(Session.getInstance().getCurrentUser().getRole(), "employee")
+        ){
+            navContainer.add(createNavButton("Orders", () ->
+                    App.getInstance().setScreen(new OrderPanel())));
+        }
+
+
 
         navContainer.add(createNavButton("Inventory", () ->
                 App.getInstance().setScreen(new InventoryPanel())));

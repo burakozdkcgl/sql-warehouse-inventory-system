@@ -56,7 +56,7 @@ public class Database {
 
 
 
-    public static void close() throws Exception {
+    public static void close() {
         if (sessionFactory != null) sessionFactory.close();
     }
 

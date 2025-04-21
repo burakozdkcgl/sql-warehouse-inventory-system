@@ -3,6 +3,7 @@ package gui;
 import db.Database;
 import entity.User;
 import logic.App;
+import logic.ErrorLogger;
 import logic.Session;
 import org.hibernate.query.Query;
 
@@ -207,18 +208,29 @@ public class UserProfilePanel extends JPanel {
     }
 
     private void saveChanges() {
-        user.setName(nameField.getText());
-        user.setUsername(usernameField.getText());
-        user.setEmail(emailField.getText());
-        user.setPassword(new String(passwordField.getPassword()));
-        if (isAdmin) user.setManager((User) managerComboBox.getSelectedItem());
-        user.setPicture(selectedPicture);
+
+        User originalSessionUser = new User();
+        originalSessionUser.setId(user.getId());
+        originalSessionUser.setName(user.getName());
+        originalSessionUser.setUsername(user.getUsername());
+        originalSessionUser.setEmail(user.getEmail());
+        originalSessionUser.setPassword(user.getPassword());
+        originalSessionUser.setRole(user.getRole());
+        originalSessionUser.setManager(user.getManager());
+        originalSessionUser.setPicture(user.getPicture() != null ? user.getPicture().clone() : null);
+
+
 
 
 
         try (org.hibernate.Session session = Database.getSessionFactory().openSession()) {
 
-
+            user.setName(nameField.getText());
+            user.setUsername(usernameField.getText());
+            user.setEmail(emailField.getText());
+            user.setPassword(new String(passwordField.getPassword()));
+            if (isAdmin) user.setManager((User) managerComboBox.getSelectedItem());
+            user.setPicture(selectedPicture);
 
             session.beginTransaction();
 
@@ -243,8 +255,11 @@ public class UserProfilePanel extends JPanel {
             logic.NotificationPanel.show(App.getInstance().getLayeredPane(), "Profile updated successfully!", 3000,"green");
             App.getInstance().setScreen(new UserProfilePanel(user));
         } catch (Exception ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error saving user.");
+            ErrorLogger.log(ex);
+            user = originalSessionUser;
+            if (user.getId().equals(Session.getInstance().getCurrentUser().getId())) Session.getInstance().setCurrentUser(user);
+            logic.NotificationPanel.show(App.getInstance().getLayeredPane(), "Unable to update. Check error log.", 3000,"red");
+            App.getInstance().setScreen(new UserProfilePanel(user));
         }
     }
 

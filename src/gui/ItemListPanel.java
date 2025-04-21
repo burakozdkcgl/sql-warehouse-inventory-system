@@ -28,7 +28,7 @@ public class ItemListPanel extends JPanel {
         ));
         whiteBox.setPreferredSize(new Dimension(950, 620));
 
-        JLabel title = new JLabel("Item List by Category", SwingConstants.CENTER);
+        JLabel title = new JLabel("Item List", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 22));
         title.setForeground(new Color(40, 40, 40));
         whiteBox.add(title, BorderLayout.NORTH);
