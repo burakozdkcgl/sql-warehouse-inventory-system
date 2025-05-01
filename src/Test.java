@@ -36,9 +36,7 @@ public class Test {
                 new java.util.Timer().schedule(new java.util.TimerTask() {
                     @Override
                     public void run() {
-                        SwingUtilities.invokeLater(() -> {
-                            app.setScreen(new gui.MainPanel());
-                        });
+                        SwingUtilities.invokeLater(() -> app.setScreen(new gui.MainPanel()));
                     }
                 }, 4500);
 

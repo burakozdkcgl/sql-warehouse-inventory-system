@@ -40,6 +40,8 @@ public class Database {
         cfg.addAnnotatedClass(entity.Item.class);
         cfg.addAnnotatedClass(entity.Warehouse.class);
         cfg.addAnnotatedClass(entity.Inventory.class);
+        cfg.addAnnotatedClass(entity.Order.class);
+        cfg.addAnnotatedClass(entity.OrderLine.class);
 
         ServiceRegistry registry = new StandardServiceRegistryBuilder()
                 .applySettings(cfg.getProperties())

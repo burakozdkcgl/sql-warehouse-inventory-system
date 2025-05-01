@@ -37,6 +37,43 @@ CREATE TABLE inventory (
   FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
 );
 
+CREATE TABLE orders (
+  id INT NOT NULL AUTO_INCREMENT,
+  created_at DATETIME NOT NULL,
+  created_by INT,
+  description VARCHAR(255),
+  status VARCHAR(50) NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
+);
+
+CREATE TABLE order_lines (
+  id INT NOT NULL AUTO_INCREMENT,
+  order_id INT NOT NULL,
+  item_id INT NOT NULL,
+  from_warehouse_id INT,
+  to_warehouse_id INT,
+  quantity INT NOT NULL,
+  PRIMARY KEY (id),
+  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
+  FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
+);
+
+INSERT INTO orders (created_at, created_by, description, status) VALUES
+('2024-05-01 10:00:00', 2, 'Restocking headphones and flash drives', 'Pending'),
+('2024-05-01 11:15:00', 3, 'Transfer monitors from Central to West', 'Approved'),
+('2024-05-01 12:30:00', 4, 'Distribute cleaning supplies to East', 'Shipped');
+INSERT INTO order_lines (order_id, item_id, from_warehouse_id, to_warehouse_id, quantity) VALUES
+(1, 2, NULL, 1, 50),
+(1, 7, NULL, 1, 100);
+INSERT INTO order_lines (order_id, item_id, from_warehouse_id, to_warehouse_id, quantity) VALUES
+(2, 5, 1, 2, 30);
+INSERT INTO order_lines (order_id, item_id, from_warehouse_id, to_warehouse_id, quantity) VALUES
+(3, 101, 1, 3, 40);
+
+
+
+
 CREATE TABLE `user_passwords` (
   `user_id` int NOT NULL,
   `password` varchar(255) NOT NULL,
@@ -59,6 +96,8 @@ CREATE TABLE `user_pictures` (
   PRIMARY KEY (`user_id`),
   FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 );
+
+
 
 
 

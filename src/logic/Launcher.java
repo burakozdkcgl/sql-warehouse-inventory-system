@@ -402,7 +402,7 @@ public class Launcher extends JFrame {
         }).start();
     }
 
-    private void launchApp() throws Exception {
+    private void launchApp() {
         Database.connect();
         dispose();
         Session.getInstance().setFullscreen(isFullscreen);
