@@ -1,6 +1,7 @@
 package gui;
 
 import db.Database;
+import db.OrderService;
 import entity.*;
 import logic.App;
 import logic.NotificationPanel;
@@ -15,7 +16,6 @@ import java.util.List;
 
 public class OrderPanel extends JPanel {
 
-    private final JPanel orderListPanel = new JPanel();
     private final JPanel createOrderPanel = new JPanel();
     private final DefaultListModel<OrderLinePanel> orderLinePanels = new DefaultListModel<>();
 
@@ -36,43 +36,81 @@ public class OrderPanel extends JPanel {
         title.setForeground(new Color(40, 40, 40));
         whiteBox.add(title, BorderLayout.NORTH);
 
-        // Tabs
+
         JTabbedPane tabs = new JTabbedPane();
-        tabs.addTab("View Orders", getOrderListTab());
+        tabs.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
+
+
+        tabs.addTab("Pending Orders", getOrderListTab("Pending"));
         tabs.addTab("Create Order", getCreateOrderTab());
+        tabs.addTab("Inactive Orders", getOrderListTab("Inactive"));
 
         whiteBox.add(tabs, BorderLayout.CENTER);
+        whiteBox.add(Box.createVerticalStrut(20), BorderLayout.SOUTH);
         add(whiteBox);
+
     }
 
-    private JScrollPane getOrderListTab() {
-        orderListPanel.setLayout(new BoxLayout(orderListPanel, BoxLayout.Y_AXIS));
-        orderListPanel.setOpaque(false);
-        refreshOrders();
-        return new JScrollPane(orderListPanel);
+    private JScrollPane getOrderListTab(String filterType) {
+        JPanel listPanel = new JPanel();
+        listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
+        listPanel.setOpaque(false);
+        refreshOrders(filterType, listPanel);
+
+        // Wrap listPanel in a container that allows horizontal stretching but prevents vertical fill
+        JPanel container = new JPanel(new BorderLayout());
+        container.setOpaque(false);
+        container.add(listPanel, BorderLayout.NORTH); // This prevents vertical stretching
+
+        JScrollPane scrollPane = new JScrollPane(container);
+        scrollPane.setBorder(null);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16); // smooth scrolling
+        return scrollPane;
     }
 
-    private void refreshOrders() {
-        orderListPanel.removeAll();
+
+
+    private void refreshOrders(String filterType, JPanel panel) {
+        panel.removeAll();
+        panel.add(Box.createVerticalStrut(10));
         try (org.hibernate.Session session = Database.getSessionFactory().openSession()) {
-            List<Order> orders = session.createQuery("FROM Order", Order.class).list();
+            String hql;
+            if ("Pending".equals(filterType)) {
+                hql = "FROM Order WHERE status = 'Pending' ORDER BY id DESC";
+            } else {
+                hql = "FROM Order WHERE status = 'Canceled' OR status = 'Approved' ORDER BY id DESC";
+            }
+
+            List<Order> orders = session.createQuery(hql, Order.class).list();
             for (Order order : orders) {
                 JPanel card = new JPanel();
                 card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
                 card.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createLineBorder(Color.GRAY),
-                        new EmptyBorder(10, 10, 10, 10)
+                        BorderFactory.createLineBorder(new Color(200, 200, 200), 1, true),
+                        new EmptyBorder(12, 16, 12, 16)
                 ));
                 card.setBackground(new Color(245, 245, 245));
 
-                JLabel info = new JLabel("Order #" + order.getId() + " | Status: " + order.getStatus() +
-                        " | Created by User ID: " + order.getCreatedBy());
-                info.setFont(new Font("Segoe UI", Font.BOLD, 14));
-                card.add(info);
+                JPanel info = new JPanel();
+                info.setLayout(new BoxLayout(info, BoxLayout.Y_AXIS)); // Line-by-line
 
-                if (order.getDescription() != null) {
-                    card.add(new JLabel("Description: " + order.getDescription()));
+                JLabel id = new JLabel("Order #" + order.getId());
+                id.setFont(new Font("Segoe UI", Font.BOLD, 14));
+
+
+                info.add(id);
+
+                if (!"Pending".equals(filterType)) {
+                    info.add(createStatusLabel(order.getStatus()));
                 }
+
+                info.add(new JLabel("Created at: " + order.getCreatedAt()));
+
+                String createdby = session.get(User.class, order.getCreatedBy()) != null ? session.get(User.class, order.getCreatedBy()).getName() : null;
+                info.add(new JLabel("Created by: " + createdby));
+
+                if (order.getDescription() != null) info.add(new JLabel("Description: " + order.getDescription()));
 
                 for (OrderLine line : order.getOrderLines()) {
                     String text = "- " + line.getQuantity() + " x " + line.getItem().getName();
@@ -80,69 +118,155 @@ public class OrderPanel extends JPanel {
                         text += " from " + line.getFromWarehouse().getName();
                     if (line.getToWarehouse() != null)
                         text += " to " + line.getToWarehouse().getName();
-                    card.add(new JLabel(text));
+                    info.add(new JLabel(text));
                 }
 
-                orderListPanel.add(card);
-                orderListPanel.add(Box.createVerticalStrut(10));
+
+                JPanel header = new JPanel(new BorderLayout());
+                header.setOpaque(false);
+                header.add(info, BorderLayout.CENTER);
+
+
+                if ("Pending".equals(filterType)) {
+                    JButton approveBtn = new JButton("Approve Order");
+                    JButton cancelBtn = new JButton("Cancel Order");
+                    approveBtn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+                    approveBtn.setBackground(new Color(70, 130, 180));
+                    approveBtn.setForeground(Color.WHITE);
+                    approveBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+                    cancelBtn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+                    cancelBtn.setBackground(new Color(70, 130, 180));
+                    cancelBtn.setForeground(Color.WHITE);
+                    cancelBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+                    approveBtn.addActionListener(e -> {
+                        OrderService.updateOrderStatus(order, "Approved");
+                        App.getInstance().setScreen(new OrderPanel());
+                    });
+                    cancelBtn.addActionListener(e -> {
+                        OrderService.updateOrderStatus(order, "Canceled");
+                        App.getInstance().setScreen(new OrderPanel());
+                    });
+
+                    JPanel buttonWrapper = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+                    buttonWrapper.setOpaque(false);
+                    buttonWrapper.add(approveBtn);
+                    buttonWrapper.add(cancelBtn);
+
+                    header.add(buttonWrapper, BorderLayout.EAST);
+
+                    card.add(header);
+                } else {
+                    header.add(Box.createHorizontalStrut(1), BorderLayout.EAST);
+                }
+
+                card.add(header);
+
+                card.setMaximumSize(new Dimension(850, Integer.MAX_VALUE));
+                panel.add(card);
+                panel.add(Box.createVerticalStrut(10));
+
+                panel.add(Box.createVerticalStrut(10));
             }
+            panel.add(Box.createVerticalGlue());
         }
     }
 
-    private JScrollPane getCreateOrderTab() {
-        createOrderPanel.setLayout(new BoxLayout(createOrderPanel, BoxLayout.Y_AXIS));
-        createOrderPanel.setOpaque(false);
+    private JLabel createStatusLabel(String status) {
+        String color = switch (status) {
+            case "Approved" -> "green";
+            case "Canceled" -> "red";
+            default -> "black";
+        };
+        return new JLabel(String.format("<html>Status: <span style='color:%s;'>%s</span></html>", color, status));
+    }
 
+
+
+    private JScrollPane getCreateOrderTab() {
+        JPanel contentPanel = new JPanel();
+        contentPanel.setLayout(new BoxLayout(contentPanel, BoxLayout.Y_AXIS));
+        contentPanel.setBorder(new EmptyBorder(30, 50, 30, 50));
+        contentPanel.setOpaque(false);
+
+        // Description Field
         JTextField descriptionField = new JTextField();
         descriptionField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
-        createOrderPanel.add(labeled("Description", descriptionField));
+        contentPanel.add(Box.createVerticalStrut(10));
+        contentPanel.add(labeled(descriptionField));
+        contentPanel.add(Box.createVerticalStrut(20));
 
+        // Order lines box
         JPanel orderLinesBox = new JPanel();
         orderLinesBox.setLayout(new BoxLayout(orderLinesBox, BoxLayout.Y_AXIS));
         orderLinesBox.setOpaque(false);
-        createOrderPanel.add(orderLinesBox);
+        contentPanel.add(orderLinesBox);
 
+        // Add/Remove/Transfer buttons
+        JPanel buttonsRow = getStyledButtonsRow(orderLinesBox);
+        contentPanel.add(Box.createVerticalStrut(15));
+        contentPanel.add(buttonsRow);
+        contentPanel.add(Box.createVerticalStrut(20));
+
+
+
+        contentPanel.add(Box.createVerticalStrut(20));
+
+        createOrderPanel.removeAll();
+        createOrderPanel.setLayout(new BorderLayout());
+        createOrderPanel.add(contentPanel, BorderLayout.NORTH);
+
+        return new JScrollPane(createOrderPanel);
+    }
+
+
+    private JPanel getStyledButtonsRow(JPanel orderLinesBox) {
         JButton addItemBtn = new JButton("Add Item");
         JButton removeItemBtn = new JButton("Remove Item");
         JButton transferItemBtn = new JButton("Transfer Item");
+        JButton submitBtn = new JButton("Submit Order");
+
+        for (JButton btn : new JButton[]{addItemBtn, removeItemBtn, transferItemBtn, submitBtn}) {
+            btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            btn.setBackground(new Color(70, 130, 180));
+            btn.setForeground(Color.WHITE);
+            btn.setFocusPainted(false);
+            btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        }
 
         addItemBtn.addActionListener(e -> {
             OrderLinePanel panel = new OrderLinePanel(OrderType.ADD);
             orderLinePanels.addElement(panel);
             orderLinesBox.add(panel);
-            createOrderPanel.revalidate();
+            orderLinesBox.revalidate();
+            orderLinesBox.repaint();
         });
 
         removeItemBtn.addActionListener(e -> {
             OrderLinePanel panel = new OrderLinePanel(OrderType.REMOVE);
             orderLinePanels.addElement(panel);
             orderLinesBox.add(panel);
-            createOrderPanel.revalidate();
+            orderLinesBox.revalidate();
+            orderLinesBox.repaint();
         });
 
         transferItemBtn.addActionListener(e -> {
             OrderLinePanel panel = new OrderLinePanel(OrderType.TRANSFER);
             orderLinePanels.addElement(panel);
             orderLinesBox.add(panel);
-            createOrderPanel.revalidate();
+            orderLinesBox.revalidate();
+            orderLinesBox.repaint();
         });
 
-        JPanel buttonsRow = new JPanel();
-        buttonsRow.add(addItemBtn);
-        buttonsRow.add(removeItemBtn);
-        buttonsRow.add(transferItemBtn);
-        createOrderPanel.add(buttonsRow);
-
-
-        JButton submit = new JButton("Submit Order");
-        submit.addActionListener(e -> {
+        submitBtn.addActionListener(e -> {
             try (org.hibernate.Session session = Database.getSessionFactory().openSession()) {
                 session.beginTransaction();
 
                 Order order = new Order();
                 order.setCreatedAt(LocalDateTime.now());
                 order.setCreatedBy(Session.getInstance().getCurrentUser().getId());
-                order.setDescription(descriptionField.getText());
+                order.setDescription(((JTextField) ((JPanel) ((JPanel) orderLinesBox.getParent()).getComponent(1)).getComponent(1)).getText());
                 order.setStatus("Pending");
 
                 List<OrderLine> lines = new ArrayList<>();
@@ -161,28 +285,31 @@ public class OrderPanel extends JPanel {
                 session.persist(order);
                 session.getTransaction().commit();
 
-
                 NotificationPanel.show(App.getInstance().getLayeredPane(), "Order created!", 3000, "green");
                 App.getInstance().setScreen(new OrderPanel());
-
-
             } catch (Exception ex) {
                 NotificationPanel.show(App.getInstance().getLayeredPane(), "Failed to create order! Check error log.", 3000, "red");
                 App.getInstance().setScreen(new OrderPanel());
             }
         });
 
-        createOrderPanel.add(Box.createVerticalStrut(20));
-        createOrderPanel.add(submit);
+        JPanel row = new JPanel();
+        row.setOpaque(false);
+        row.setLayout(new FlowLayout(FlowLayout.CENTER, 15, 0));
+        row.add(addItemBtn);
+        row.add(removeItemBtn);
+        row.add(transferItemBtn);
+        row.add(submitBtn);
 
-        return new JScrollPane(createOrderPanel);
+        return row;
     }
 
-    private JPanel labeled(String text, JComponent comp) {
+
+    private JPanel labeled(JComponent comp) {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
         panel.setOpaque(false);
-        JLabel label = new JLabel(text);
-        label.setPreferredSize(new Dimension(100, 25));
+        JLabel label = new JLabel("Order description: (optional)");
+        label.setPreferredSize(new Dimension(200, 25));
         panel.add(label, BorderLayout.WEST);
         panel.add(comp, BorderLayout.CENTER);
         panel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
@@ -197,8 +324,8 @@ public class OrderPanel extends JPanel {
 
         public OrderLinePanel(OrderType type) {
             setLayout(new BorderLayout());
-            setPreferredSize(new Dimension(880, 40));
-            setMaximumSize(new Dimension(880, 40)); // adjust based on parent layout
+            setPreferredSize(new Dimension(0, 40));
+            setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
 
             JPanel fieldsPanel = new JPanel(new GridLayout(1, 4, 10, 0));
 
@@ -210,8 +337,11 @@ public class OrderPanel extends JPanel {
 
                 fromBox = new JComboBox<>();
                 toBox = new JComboBox<>();
-                fromBox.addItem(null);
-                toBox.addItem(null);
+                if (type == OrderType.ADD) {
+                    fromBox.addItem(null);
+                } else if (type == OrderType.REMOVE) {
+                    toBox.addItem(null);
+                }
                 for (Warehouse w : warehouses) {
                     fromBox.addItem(w);
                     toBox.addItem(w);
@@ -234,12 +364,17 @@ public class OrderPanel extends JPanel {
             fieldsPanel.add(quantityBox);
 
             // Create remove button
-            JButton removeBtn = new JButton("✕");
+            JButton removeBtn = new JButton("X");
+            removeBtn.setFont(new Font("Segoe UI", Font.BOLD, 14));
+            removeBtn.setBackground(new Color(70, 130, 180));
+            removeBtn.setForeground(Color.WHITE);
+            removeBtn.setFocusPainted(false);
             removeBtn.setPreferredSize(new Dimension(45, 30));
+            removeBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             removeBtn.setFocusPainted(false);
             removeBtn.addActionListener(e -> {
                 Container parent = this.getParent();
-                ((DefaultListModel<?>) orderLinePanels).removeElement(this);
+                orderLinePanels.removeElement(this);
                 parent.remove(this);
                 parent.revalidate();
                 parent.repaint();
@@ -255,5 +390,6 @@ public class OrderPanel extends JPanel {
     public enum OrderType {
         ADD, REMOVE, TRANSFER
     }
+
 
 }

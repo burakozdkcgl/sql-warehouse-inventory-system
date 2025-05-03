@@ -58,8 +58,8 @@ public class Inventory {
     }
 
     public static class Pk implements Serializable {
-        private Integer warehouse_id;
-        private Integer item_id;
+        public Integer warehouse_id;
+        public Integer item_id;
 
         public Pk() {}
 

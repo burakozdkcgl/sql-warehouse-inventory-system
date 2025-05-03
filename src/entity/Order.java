@@ -3,6 +3,7 @@ package entity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "orders")
@@ -52,6 +53,7 @@ public class Order {
     }
 
     public String getDescription() {
+        if (Objects.equals(description, "")) description = null;
         return description;
     }
 
