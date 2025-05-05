@@ -25,9 +25,28 @@ public class Warehouse {
     public String getName() {
         return name;
     }
+    public String getDescription() {
+        return description;
+    }
+    public String getLocation() {
+        return location;
+    }
 
     @Override
     public String toString() {
         return name;
     }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
 }

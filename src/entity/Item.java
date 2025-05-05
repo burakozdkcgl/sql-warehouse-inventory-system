@@ -45,4 +45,21 @@ public class Item {
         return name + " (" + sku + ")";
     }
 
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public void setSku(String sku) {
+        this.sku = sku;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+
 }

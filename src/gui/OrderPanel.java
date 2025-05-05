@@ -4,6 +4,7 @@ import db.Database;
 import db.OrderService;
 import entity.*;
 import logic.App;
+import logic.ErrorLogger;
 import logic.NotificationPanel;
 import logic.Session;
 
@@ -107,8 +108,15 @@ public class OrderPanel extends JPanel {
 
                 info.add(new JLabel("Created at: " + order.getCreatedAt()));
 
-                String createdby = session.get(User.class, order.getCreatedBy()) != null ? session.get(User.class, order.getCreatedBy()).getName() : null;
-                info.add(new JLabel("Created by: " + createdby));
+                Integer creatorId = order.getCreatedBy();
+                String createdByName = "Removed User";
+                if (creatorId != null) {
+                    User creator = session.get(User.class, creatorId);
+                    if (creator != null) {
+                        createdByName = creator.getName();
+                    }
+                }
+                info.add(new JLabel("Created by: " + createdByName));
 
                 if (order.getDescription() != null) info.add(new JLabel("Description: " + order.getDescription()));
 
@@ -288,6 +296,7 @@ public class OrderPanel extends JPanel {
                 NotificationPanel.show(App.getInstance().getLayeredPane(), "Order created!", 3000, "green");
                 App.getInstance().setScreen(new OrderPanel());
             } catch (Exception ex) {
+                ErrorLogger.log(ex);
                 NotificationPanel.show(App.getInstance().getLayeredPane(), "Failed to create order! Check error log.", 3000, "red");
                 App.getInstance().setScreen(new OrderPanel());
             }

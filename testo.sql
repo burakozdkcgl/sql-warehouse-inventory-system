@@ -56,8 +56,10 @@ CREATE TABLE order_lines (
   quantity INT NOT NULL,
   PRIMARY KEY (id),
   FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
-  FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
-);
+  FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE,
+  FOREIGN KEY (from_warehouse_id) REFERENCES warehouses(id) ON DELETE CASCADE,
+  FOREIGN KEY (to_warehouse_id) REFERENCES warehouses(id) ON DELETE CASCADE
+  );
 
 INSERT INTO orders (created_at, created_by, description, status) VALUES
 ('2024-05-01 10:00:00', 2, 'Restocking headphones and flash drives', 'Pending'),

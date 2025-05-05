@@ -18,7 +18,7 @@ public class Test {
 
                 User testUser;
                 try (org.hibernate.Session session = Database.getSessionFactory().openSession()) {
-                    testUser = session.get(User.class, 2);
+                    testUser = session.get(User.class, 1);
                 }
 
 
