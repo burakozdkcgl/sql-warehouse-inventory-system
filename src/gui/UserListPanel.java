@@ -55,7 +55,6 @@ public class UserListPanel extends JPanel {
             }
 
         } catch (Exception e) {
-            logic.ErrorLogger.log(e);
             userPanel.add(new JLabel("Failed to load users."));
         }
 

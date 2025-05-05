@@ -4,7 +4,6 @@ import db.Database;
 import db.OrderService;
 import entity.*;
 import logic.App;
-import logic.ErrorLogger;
 import logic.NotificationPanel;
 import logic.Session;
 
@@ -296,8 +295,7 @@ public class OrderPanel extends JPanel {
                 NotificationPanel.show(App.getInstance().getLayeredPane(), "Order created!", 3000, "green");
                 App.getInstance().setScreen(new OrderPanel());
             } catch (Exception ex) {
-                ErrorLogger.log(ex);
-                NotificationPanel.show(App.getInstance().getLayeredPane(), "Failed to create order! Check error log.", 3000, "red");
+                NotificationPanel.show(App.getInstance().getLayeredPane(), "Failed to create order!", 3000, "red");
                 App.getInstance().setScreen(new OrderPanel());
             }
         });

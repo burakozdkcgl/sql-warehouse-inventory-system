@@ -78,8 +78,7 @@ public class Launcher extends JFrame {
             try {
                 launchApp();
             } catch (Exception ex) {
-                ErrorLogger.log(ex);
-                showError(statusLabel, "Failed to launch application. Check error log.");
+                showError(statusLabel, "Failed to launch application. Check connection.");
             }
         });
 
@@ -237,8 +236,7 @@ public class Launcher extends JFrame {
                 try {
                     launchApp();
                 } catch (Exception ex) {
-                    ErrorLogger.log(ex);
-                    showError(statusLabel, "Failed to launch application. Check error log.");
+                    showError(statusLabel, "Failed to launch application. Check connection.");
                 }
             });
         } else {
@@ -267,8 +265,7 @@ public class Launcher extends JFrame {
                 try {
                     launchApp();
                 } catch (Exception ex) {
-                    ErrorLogger.log(ex);
-                    showError(statusLabel, "Failed to launch application. Check error log.");
+                    showError(statusLabel, "Failed to launch application. Check connection.");
                 }
             });
 

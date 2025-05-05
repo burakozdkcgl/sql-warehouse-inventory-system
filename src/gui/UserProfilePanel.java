@@ -3,7 +3,6 @@ package gui;
 import db.Database;
 import entity.User;
 import logic.App;
-import logic.ErrorLogger;
 import logic.Session;
 import org.hibernate.query.Query;
 
@@ -255,10 +254,9 @@ public class UserProfilePanel extends JPanel {
             logic.NotificationPanel.show(App.getInstance().getLayeredPane(), "Profile updated successfully!", 3000,"green");
             App.getInstance().setScreen(new UserProfilePanel(user));
         } catch (Exception ex) {
-            ErrorLogger.log(ex);
             user = originalSessionUser;
             if (user.getId().equals(Session.getInstance().getCurrentUser().getId())) Session.getInstance().setCurrentUser(user);
-            logic.NotificationPanel.show(App.getInstance().getLayeredPane(), "Unable to update. Check error log.", 3000,"red");
+            logic.NotificationPanel.show(App.getInstance().getLayeredPane(), "Unable to update.", 3000,"red");
             App.getInstance().setScreen(new UserProfilePanel(user));
         }
     }

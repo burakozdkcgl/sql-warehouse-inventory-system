@@ -67,10 +67,15 @@ public class ManagePanelWindow extends JPanel {
         box.add(line1);
 
 
-        JLabel line2 = new JLabel("It can be changed from user profile after their first login", SwingConstants.CENTER);
+        JLabel line2 = new JLabel("Users can set a new password after their first login from their profile", SwingConstants.CENTER);
         line2.setFont(new Font("Segoe UI", Font.BOLD, 12));
         line2.setAlignmentX(Component.CENTER_ALIGNMENT);
         box.add(line2);
+
+        JLabel line3 = new JLabel("Admins also can change details by visiting user profiles from user list", SwingConstants.CENTER);
+        line3.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        line3.setAlignmentX(Component.CENTER_ALIGNMENT);
+        box.add(line3);
 
         box.add(Box.createVerticalStrut(20));
         box.add(createBtn);

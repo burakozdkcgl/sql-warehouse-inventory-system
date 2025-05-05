@@ -54,7 +54,7 @@ public class SettingsPanel extends JPanel {
             try {
                 db.Database.close();
             } catch (Exception ex) {
-                logic.ErrorLogger.log(ex);
+                throw new RuntimeException(ex);
             }
             System.exit(0);
         });

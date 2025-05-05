@@ -33,7 +33,7 @@ public class ConfigManager {
         try (FileOutputStream out = new FileOutputStream("config.properties")) {
             props.store(out, null);
         } catch (IOException e) {
-            ErrorLogger.log(e);
+            throw new RuntimeException(e);
         }
     }
 
@@ -48,7 +48,7 @@ public class ConfigManager {
             config.username = props.getProperty("username");
             config.password = props.getProperty("password");
         } catch (IOException e) {
-            ErrorLogger.log(e);
+            throw new RuntimeException(e);
         }
     }
 

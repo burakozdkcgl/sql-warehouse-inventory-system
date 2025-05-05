@@ -2,6 +2,8 @@ package gui;
 
 import db.Database;
 import entity.Item;
+import logic.App;
+import logic.NotificationPanel;
 import org.hibernate.Session;
 
 import javax.swing.*;
@@ -114,8 +116,7 @@ public class ItemListPanel extends JPanel {
             List<Item> items = session.createQuery("FROM Item", Item.class).list();
             map = items.stream().collect(Collectors.groupingBy(Item::getCategory, TreeMap::new, Collectors.toList()));
         } catch (Exception e) {
-            logic.ErrorLogger.log(e);
-            JOptionPane.showMessageDialog(this, "Failed to load items.\nSee error log.", "Error", JOptionPane.ERROR_MESSAGE);
+            NotificationPanel.show(App.getInstance().getLayeredPane(), "Failed to list items!", 3000, "red");
         }
         return map;
     }
