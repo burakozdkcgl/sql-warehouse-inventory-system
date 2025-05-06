@@ -59,12 +59,12 @@ CREATE TABLE order_lines (
   FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE,
   FOREIGN KEY (from_warehouse_id) REFERENCES warehouses(id) ON DELETE CASCADE,
   FOREIGN KEY (to_warehouse_id) REFERENCES warehouses(id) ON DELETE CASCADE
-  );
+);
 
 INSERT INTO orders (created_at, created_by, description, status) VALUES
 ('2024-05-01 10:00:00', 2, 'Restocking headphones and flash drives', 'Pending'),
 ('2024-05-01 11:15:00', 3, 'Transfer monitors from Central to West', 'Approved'),
-('2024-05-01 12:30:00', 4, 'Distribute cleaning supplies to East', 'Shipped');
+('2024-05-01 12:30:00', 4, 'Distribute cleaning supplies to East', 'Pending');
 INSERT INTO order_lines (order_id, item_id, from_warehouse_id, to_warehouse_id, quantity) VALUES
 (1, 2, NULL, 1, 50),
 (1, 7, NULL, 1, 100);

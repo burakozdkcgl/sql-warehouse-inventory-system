@@ -114,7 +114,7 @@ public class ManagePanel extends JPanel {
 
         JComboBox<Warehouse> warehouseBox = new JComboBox<>();
         JComboBox<Item> itemBox = new JComboBox<>();
-        JSpinner reorderSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 9999, 1));
+        JSpinner reorderSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 1000000000, 1));
         JButton saveBtn = createButton("Set Reorder Level");
 
         warehouseBox.setPreferredSize(new Dimension(200, 25));

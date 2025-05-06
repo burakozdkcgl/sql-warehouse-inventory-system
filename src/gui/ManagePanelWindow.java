@@ -29,7 +29,7 @@ public class ManagePanelWindow extends JPanel {
         JTextField usernameField = new JTextField("newuser");
         JTextField emailField = new JTextField("email@example.com");
 
-        JComboBox<String> roleBox = new JComboBox<>(new String[]{"employee", "manager", "admin"});
+        JComboBox<String> roleBox = new JComboBox<>(new String[]{"employee", "manager", "admin", "guest"});
 
         box.add(createField("Name", nameField));
         box.add(createField("Username", usernameField));

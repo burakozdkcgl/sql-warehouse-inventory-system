@@ -105,10 +105,10 @@ public class OrderPanel extends JPanel {
                     info.add(createStatusLabel(order.getStatus()));
                 }
 
-                info.add(new JLabel("Created at: " + order.getCreatedAt()));
+                info.add(new JLabel("Created at: " + order.getFormattedCreatedAt()));
 
                 Integer creatorId = order.getCreatedBy();
-                String createdByName = "Removed User";
+                String createdByName = "Deleted User";
                 if (creatorId != null) {
                     User creator = session.get(User.class, creatorId);
                     if (creator != null) {
@@ -355,7 +355,7 @@ public class OrderPanel extends JPanel {
                 }
             }
 
-            quantityBox = new JSpinner(new SpinnerNumberModel(1, 1, 1000, 1));
+            quantityBox = new JSpinner(new SpinnerNumberModel(1, 1, 1000000000, 1));
 
             fieldsPanel.add(itemBox);
             if (type == OrderType.TRANSFER) {
