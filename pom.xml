@@ -58,7 +58,7 @@
         <sourceDirectory>${project.basedir}/src</sourceDirectory>
         <resources>
             <resource>
-                <directory>${project.basedir}/resources</directory>
+                <directory>${project.basedir}/src/resources</directory>
                 <includes>
                     <include>**/*</include>
                 </includes>

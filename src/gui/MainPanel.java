@@ -45,7 +45,7 @@ public class MainPanel extends JPanel {
 
         // Top Stats
         JPanel statsRow = new JPanel(new GridLayout(1, 5, 15, 10));
-        statsRow.add(createStatCard("Items", getCount("Item")));
+        statsRow.add(createStatCard("Item Types", getCount("Item")));
         statsRow.add(createStatCard("Below Reorder", getItemsBelowReorderCount()));
         statsRow.add(createStatCard("Warehouses", getCount("Warehouse")));
         statsRow.add(createStatCard("Users", getCount("User")));

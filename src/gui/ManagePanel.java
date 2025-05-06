@@ -339,7 +339,12 @@ public class ManagePanel extends JPanel {
 
                 NotificationPanel.show(App.getInstance().getLayeredPane(),
                         "User " + (promote ? "promoted" : "depromoted"), 3000, "green");
-                userBox.removeItem(selected);
+                if (Objects.equals(selected.getId(), Session.getInstance().getCurrentUser().getId())) {
+                    Session.getInstance().setCurrentUser(selected); // refresh session user
+                    App.getInstance().setScreen(new MainPanel()); // re-invoke with updated role
+                } else {
+                    userBox.removeItem(selected);
+                }
             }
         });
 
