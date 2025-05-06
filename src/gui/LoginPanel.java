@@ -96,6 +96,7 @@ public class LoginPanel extends JPanel {
             if (user != null) {
                 Session.getInstance().setCurrentUser(user);
                 App.getInstance().setScreen(new MainPanel());
+                NotificationPanel.show(App.getInstance().getLayeredPane(), "Login successful!", 3000, "green");
             } else {
                 NotificationPanel.show(App.getInstance().getLayeredPane(), "Invalid credentials!", 3000, "red");
 

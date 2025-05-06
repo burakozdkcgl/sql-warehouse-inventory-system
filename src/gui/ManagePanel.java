@@ -43,11 +43,13 @@ public class ManagePanel extends JPanel {
         content.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         content.add(Box.createVerticalStrut(15));
-        content.add(createSectionPanel("Manage Reorder Levels", createReorderForm()));
+        content.add(createSectionPanel("Set Reorder Levels", createReorderForm()));
         content.add(Box.createVerticalStrut(15));
         content.add(createSectionPanel("Manage Users", createUserManagementPanel()));
         content.add(Box.createVerticalStrut(15));
         content.add(createSectionPanel("Manage Items", createItemManagementPanel()));
+        content.add(Box.createVerticalStrut(15));
+        content.add(createSectionPanel("Delete Inventory Records", createInventoryManagementPanel()));
         content.add(Box.createVerticalStrut(15));
         content.add(createSectionPanel("Manage Warehouses", createWarehouseManagementPanel()));
         content.add(Box.createVerticalStrut(15));
@@ -104,6 +106,7 @@ public class ManagePanel extends JPanel {
 
         return section;
     }
+
 
 
 
@@ -196,7 +199,7 @@ public class ManagePanel extends JPanel {
 
         // Main Buttons
         JButton createUserBtn = createButton("Create a User");
-        JButton removeUserBtn = createButton("Remove a User");
+        JButton removeUserBtn = createButton("Delete a User");
         JButton promoteUserBtn = createButton("Promote a User");
         JButton depromoteUserBtn = createButton("Depromote a User");
         JButton assignManagerBtn = createButton("Assign Manager to a User");
@@ -747,6 +750,67 @@ public class ManagePanel extends JPanel {
         return container;
     }
 
+
+    private JPanel createInventoryManagementPanel() {
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
+        panel.setOpaque(false);
+
+        JComboBox<Warehouse> warehouseBox = new JComboBox<>();
+        JComboBox<Item> itemBox = new JComboBox<>();
+        JButton removeBtn = createButton("Remove");
+
+        warehouseBox.setPreferredSize(new Dimension(200, 25));
+        itemBox.setPreferredSize(new Dimension(200, 25));
+
+        panel.add(new JLabel("Warehouse:"));
+        panel.add(warehouseBox);
+        panel.add(new JLabel("Item:"));
+        panel.add(itemBox);
+        panel.add(removeBtn);
+
+        try (org.hibernate.Session session = Database.getSessionFactory().openSession()) {
+            List<Warehouse> warehouses = session.createQuery("FROM Warehouse", Warehouse.class).list();
+            for (Warehouse w : warehouses) warehouseBox.addItem(w);
+        }
+
+        warehouseBox.addActionListener(e -> {
+            itemBox.removeAllItems();
+            Warehouse selected = (Warehouse) warehouseBox.getSelectedItem();
+            if (selected == null) return;
+
+            try (org.hibernate.Session session = Database.getSessionFactory().openSession()) {
+                List<Inventory> inventoryList = session.createQuery(
+                                "FROM Inventory WHERE warehouse_id = :wid", Inventory.class)
+                        .setParameter("wid", selected.getId())
+                        .list();
+
+                for (Inventory inv : inventoryList) {
+                    Item item = session.get(Item.class, inv.getItemId());
+                    if (item != null) itemBox.addItem(item);
+                }
+            }
+        });
+
+        removeBtn.addActionListener(e -> {
+            Warehouse warehouse = (Warehouse) warehouseBox.getSelectedItem();
+            Item item = (Item) itemBox.getSelectedItem();
+            if (warehouse == null || item == null) return;
+
+            Inventory.Pk pk = new Inventory.Pk(warehouse.getId(), item.getId());
+            Inventory dummy = new Inventory();
+            dummy.setWarehouseId(pk.warehouse_id);
+            dummy.setItemId(pk.item_id);
+
+            App.getInstance().setScreen(new ManagePanelWindow(dummy));
+        });
+
+        // Ensure first warehouse triggers item load
+        if (warehouseBox.getItemCount() > 0) {
+            warehouseBox.setSelectedIndex(0); // this fires the action listener and populates itemBox
+        }
+
+        return panel;
+    }
 
 
 

@@ -57,11 +57,24 @@ public class Inventory {
         this.reorder_level = reorder_level;
     }
 
+
+    @Override
+    public String toString() {
+        try (org.hibernate.Session session = db.Database.getSessionFactory().openSession()) {
+            entity.Item item = session.get(entity.Item.class, item_id);
+            entity.Warehouse warehouse = session.get(entity.Warehouse.class, warehouse_id);
+            String itemStr = item != null ? item.toString() : "Unknown Item";
+            String warehouseStr = warehouse != null ? warehouse.toString() : "Unknown Warehouse";
+            return warehouseStr + " - " + itemStr;
+        }
+    }
+
     public static class Pk implements Serializable {
         public Integer warehouse_id;
         public Integer item_id;
 
-        public Pk() {}
+        public Pk() {
+        }
 
         public Pk(Integer warehouse_id, Integer item_id) {
             this.warehouse_id = warehouse_id;
@@ -81,5 +94,8 @@ public class Inventory {
         public int hashCode() {
             return Objects.hash(warehouse_id, item_id);
         }
+
+
+
     }
 }

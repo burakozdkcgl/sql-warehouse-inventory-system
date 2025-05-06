@@ -156,6 +156,8 @@ public class MainPanel extends JPanel {
         }
 
         JFreeChart chart = ChartFactory.createPieChart("Item Distribution Across Warehouses", dataset, true, true, false);
+        ((org.jfree.chart.plot.PiePlot) chart.getPlot()).setLabelFont(new Font("SansSerif", Font.PLAIN, 10));
+        chart.getTitle().setFont(new Font("SansSerif", Font.BOLD, 12));
 
         chart.setBackgroundPaint(Color.WHITE);
         chart.getPlot().setBackgroundPaint(Color.WHITE);
@@ -190,6 +192,11 @@ public class MainPanel extends JPanel {
                 org.jfree.chart.plot.PlotOrientation.VERTICAL, false, true, false);
 
         CategoryPlot plot = chart.getCategoryPlot();
+
+        plot.getDomainAxis().setTickLabelFont(new Font("SansSerif", Font.PLAIN, 10));
+        plot.getRangeAxis().setTickLabelFont(new Font("SansSerif", Font.PLAIN, 10));
+        chart.getTitle().setFont(new Font("SansSerif", Font.BOLD, 12));
+
         BarRenderer renderer = (BarRenderer) plot.getRenderer();
         renderer.setMaximumBarWidth(0.1);
 

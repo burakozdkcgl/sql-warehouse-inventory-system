@@ -1,6 +1,7 @@
 package gui;
 
 import db.Database;
+import entity.Inventory;
 import entity.Item;
 import entity.User;
 import entity.Warehouse;
@@ -104,6 +105,12 @@ public class ManagePanelWindow extends JPanel {
         confirmAndDelete(item, Item.class, message, info);
     }
 
+    public ManagePanelWindow(Inventory inventory) {
+        String message = "Are you sure you want to delete this record?";
+        String info = inventory.toString();
+        confirmAndDelete(inventory, Inventory.class, message, info);
+    }
+
 
     public ManagePanelWindow(Warehouse warehouse) {
         String message = "Are you sure you want to delete this warehouse?";
@@ -138,17 +145,25 @@ public class ManagePanelWindow extends JPanel {
         yesBtn.addActionListener(e -> {
             try (org.hibernate.Session session = Database.getSessionFactory().openSession()) {
                 session.beginTransaction();
-                Object attached = session.get(clazz, clazz.getMethod("getId").invoke(entity));
-                if (attached != null) session.remove(attached);
+
+                if (entity instanceof Inventory inv) {
+                    Inventory.Pk pk = new Inventory.Pk(inv.getWarehouseId(), inv.getItemId());
+                    Inventory attached = session.get(Inventory.class, pk);
+                    if (attached != null) session.remove(attached);
+                } else {
+                    Object attached = session.get(clazz, clazz.getMethod("getId").invoke(entity));
+                    if (attached != null) session.remove(attached);
+                }
+
                 session.getTransaction().commit();
 
-                // Check if the deleted entity is the current user
+                // Session logic
                 if (entity instanceof User deletedUser &&
                         deletedUser.getId().equals(Session.getInstance().getCurrentUser().getId())) {
-                    Session.getInstance().setCurrentUser(null); // clear session
-                    App.getInstance().setScreen(new LoginPanel()); // redirect to login
+                    Session.getInstance().setCurrentUser(null);
+                    App.getInstance().setScreen(new LoginPanel());
                 } else {
-                    App.getInstance().setScreen(new ManagePanel()); // fallback
+                    App.getInstance().setScreen(new ManagePanel());
                 }
 
                 NotificationPanel.show(App.getInstance().getLayeredPane(), "Deleted entity", 3000, "green");
@@ -156,6 +171,7 @@ public class ManagePanelWindow extends JPanel {
                 NotificationPanel.show(App.getInstance().getLayeredPane(), "Deletion failed", 3000, "red");
             }
         });
+
 
 
         noBtn.addActionListener(e -> App.getInstance().setScreen(new ManagePanel()));

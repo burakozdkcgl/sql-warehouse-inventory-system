@@ -61,21 +61,6 @@ CREATE TABLE order_lines (
   FOREIGN KEY (to_warehouse_id) REFERENCES warehouses(id) ON DELETE CASCADE
 );
 
-INSERT INTO orders (created_at, created_by, description, status) VALUES
-('2024-05-01 10:00:00', 2, 'Restocking headphones and flash drives', 'Pending'),
-('2024-05-01 11:15:00', 3, 'Transfer monitors from Central to West', 'Approved'),
-('2024-05-01 12:30:00', 4, 'Distribute cleaning supplies to East', 'Pending');
-INSERT INTO order_lines (order_id, item_id, from_warehouse_id, to_warehouse_id, quantity) VALUES
-(1, 2, NULL, 1, 50),
-(1, 7, NULL, 1, 100);
-INSERT INTO order_lines (order_id, item_id, from_warehouse_id, to_warehouse_id, quantity) VALUES
-(2, 5, 1, 2, 30);
-INSERT INTO order_lines (order_id, item_id, from_warehouse_id, to_warehouse_id, quantity) VALUES
-(3, 101, 1, 3, 40);
-
-
-
-
 CREATE TABLE `user_passwords` (
   `user_id` int NOT NULL,
   `password` varchar(255) NOT NULL,
@@ -99,26 +84,45 @@ CREATE TABLE `user_pictures` (
   FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 );
 
+INSERT INTO `users` VALUES
+(1,'admin','admin','admin@example.com','admin');
+INSERT INTO `user_passwords` VALUES
+(1,'admin');
+
+
+
+
+
 
 
 
 
 INSERT INTO `users` VALUES
-(1,'Alice Johnson','alicej','alice@example.com','admin'),
-(2,'Bob Smith','bobsmith','bob@example.com','employee'),
-(3,'Charlie Brown','charlieb','charlie@example.com','manager'),
-(4,'Diana Prince','dianap','diana@example.com','employee'),
-(5,'Ethan Hunt','ethanh','ethan@example.com','employee');
+(2,'Ferhunde Güven','ferhundee','benferhunde@example.com','admin'),
+(3,'Oğuz Ayhan','oguz','oguz@example.com','manager'),
+(4,'Sedef Turan','sedef','bucurkiz@example.com','manager'),
+(5,'Hayriye Tekin','hayriye','amanagzimizintadi@example.com','manager'),
+(6,'Şevket Tekin','sevket','sevket@example.com','employee'),
+(7,'Cevriye Başsoy','cevriyehanim','ethan@example.com','employee'),
+(8,'Ceyda Ayhan','ceyda','ceydaa@example.com','employee'),
+(9,'Fikret Tekin','fiko','fiko@example.com','employee'),
+(10,'Neyyir Genç','nehirhanim','nehrr@example.com','guest');
 
 INSERT INTO `user_passwords` VALUES
-(1,'password123'),
-(2,'qwerty456'),
-(3,'charlie789'),
-(4,'wonderwoman'),
-(5,'mission123');
+(2,'password'),
+(3,'password'),
+(4,'password'),
+(5,'password'),
+(6,'password'),
+(7,'password'),
+(8,'password'),
+(9,'password'),
+(10,'password');
 
-INSERT INTO `user_managers` VALUES (1,NULL),(3,NULL),(2,3),(4,3),(5,3);
-
+INSERT INTO user_managers (user_id, manager_id) VALUES
+(6, 3),
+(8, 3),
+(9, 5);
 
 INSERT INTO `warehouses` (`name`, `location`, `description`) VALUES
 ('Central Depot', '123 Main St, Springfield', 'Main storage facility for regional distribution'),
@@ -248,123 +252,84 @@ INSERT INTO `items` (`category`, `sku`, `name`, `description`) VALUES
 ('White Goods', 'W-010', 'Dehumidifier', 'A high-capacity dehumidifier with auto-shutoff and continuous drain option.');
 
 INSERT INTO inventory (warehouse_id, item_id, quantity, reorder_level) VALUES
-(1, 82, 133, 25),
-(1, 15, 100, 30),
-(1, 4, 108, 14),
-(1, 95, 83, 14),
-(1, 36, 81, 27),
-(1, 32, 118, 18),
-(1, 29, 145, 28),
-(1, 18, 104, 28),
-(1, 117, 101, 21),
-(1, 14, 78, 14),
-(1, 98, 147, 12),
-(1, 74, 149, 14),
-(1, 5, 82, 28),
-(1, 78, 105, 15),
-(1, 1, 70, 22),
-(1, 28, 144, 13),
-(1, 88, 76, 14),
-(1, 26, 139, 13),
-(1, 69, 86, 15),
-(1, 81, 148, 21),
-(1, 47, 81, 22),
-(1, 99, 116, 29),
-(1, 90, 124, 25),
-(1, 92, 149, 25),
-(1, 9, 116, 24),
-(1, 87, 135, 18),
-(1, 13, 108, 16),
-(1, 7, 76, 22),
-(1, 91, 72, 17),
-(1, 89, 115, 13),
-(1, 38, 107, 25),
-(1, 60, 119, 14),
-(1, 52, 104, 29),
-(1, 19, 61, 16),
-(1, 44, 120, 17),
-(1, 6, 128, 24),
-(1, 20, 138, 26),
-(1, 100, 105, 15),
-(1, 31, 86, 24),
-(1, 27, 81, 14),
-(2, 85, 140, 13),
-(2, 35, 122, 15),
-(2, 17, 97, 19),
-(2, 23, 79, 20),
-(2, 24, 92, 28),
-(2, 102, 123, 16),
-(2, 10, 106, 14),
-(2, 12, 70, 15),
-(2, 64, 77, 14),
-(2, 106, 135, 27),
-(2, 37, 121, 17),
-(2, 2, 143, 26),
-(2, 50, 85, 24),
-(2, 83, 147, 24),
-(2, 25, 116, 18),
-(2, 76, 111, 24),
-(2, 86, 90, 12),
-(2, 39, 145, 13),
-(2, 73, 91, 27),
-(2, 33, 134, 29),
-(2, 116, 107, 12),
-(2, 16, 120, 24),
-(2, 45, 109, 25),
-(2, 84, 62, 25),
-(2, 103, 106, 24),
-(2, 105, 87, 29),
-(2, 58, 119, 19),
-(2, 8, 144, 29),
-(2, 75, 95, 20),
-(2, 3, 85, 25),
-(2, 55, 96, 21),
-(2, 53, 78, 18),
-(2, 77, 93, 27),
-(2, 93, 145, 22),
-(2, 57, 110, 24),
-(2, 70, 75, 25),
-(2, 61, 116, 14),
-(2, 41, 143, 29),
-(2, 67, 64, 23),
-(2, 104, 121, 29),
-(3, 21, 125, 25),
-(3, 22, 101, 16),
-(3, 59, 134, 21),
-(3, 43, 112, 28),
-(3, 42, 122, 18),
-(3, 71, 113, 14),
-(3, 66, 138, 25),
-(3, 48, 75, 16),
-(3, 34, 138, 28),
-(3, 96, 79, 21),
-(3, 49, 95, 13),
-(3, 63, 115, 28),
-(3, 111, 128, 24),
-(3, 97, 101, 14),
-(3, 109, 148, 29),
-(3, 108, 128, 18),
-(3, 112, 104, 28),
-(3, 62, 118, 29),
-(3, 46, 84, 23),
-(3, 110, 147, 12),
-(3, 40, 86, 25),
-(3, 68, 104, 14),
-(3, 30, 108, 20),
-(3, 114, 111, 13),
-(3, 107, 137, 13),
-(3, 56, 115, 18),
-(3, 113, 102, 17),
-(3, 94, 117, 28),
-(3, 79, 86, 19),
-(3, 65, 138, 21),
-(3, 115, 144, 13),
-(3, 80, 97, 28),
-(3, 11, 74, 25),
-(3, 100, 140, 21),
-(3, 72, 109, 26),
-(3, 54, 149, 24),
-(3, 119, 147, 22),
-(3, 120, 103, 14),
-(3, 101, 125, 25),
-(3, 19, 127, 18);
+(1, 82, 39, 15),
+(1, 15, 21, 25),
+(1, 32, 74, 20),
+(1, 29, 84, 20),
+(1, 18, 17, 25),
+(1, 14, 34, 15),
+(1, 70, 64, 25),
+(1, 55, 9, 25),
+(1, 28, 0, 20),
+(1, 30, 63, 25),
+(1, 65, 94, 25),
+(1, 72, 58, 15),
+(1, 26, 55, 25),
+(1, 92, 2, 15),
+(1, 90, 97, 25),
+(1, 54, 82, 15),
+(1, 58, 5, 15),
+(1, 106, 7, 20),
+(1, 44, 40, 25),
+(1, 86, 38, 25),
+(2, 4, 46, 25),
+(2, 95, 100, 25),
+(2, 29, 13, 15),
+(2, 117, 57, 25),
+(2, 112, 55, 25),
+(2, 12, 21, 25),
+(2, 76, 16, 25),
+(2, 55, 7, 20),
+(2, 5, 9, 15),
+(2, 78, 7, 25),
+(2, 103, 10, 15),
+(2, 26, 14, 15),
+(2, 84, 29, 15),
+(2, 54, 21, 25),
+(2, 114, 4, 20),
+(2, 58, 90, 25),
+(2, 1, 72, 15),
+(2, 21, 10, 15),
+(2, 105, 13, 20),
+(2, 86, 31, 20),
+(3, 36, 42, 25),
+(3, 117, 63, 15),
+(3, 14, 3, 15),
+(3, 87, 84, 25),
+(3, 118, 3, 15),
+(3, 107, 90, 15),
+(3, 28, 8, 15),
+(3, 30, 50, 15),
+(3, 65, 81, 15),
+(3, 72, 27, 15),
+(3, 108, 6, 15),
+(3, 114, 83, 20),
+(3, 116, 96, 20),
+(3, 1, 49, 25),
+(3, 21, 0, 15),
+(3, 105, 37, 25);
+
+INSERT INTO orders (created_at, created_by, description, status) VALUES
+('2025-05-04 09:15:00', 6, 'Send office supplies from East to Central', 'Approved'),
+('2025-05-04 16:45:00', 7, 'Transfer sports items to West Hub', 'Pending'),
+('2025-05-05 08:50:00', 8, 'Redistribute surplus toys to Central Depot', 'Pending'),
+('2025-05-05 13:30:00', 9, 'Urgent electronics movement to East', 'Canceled'),
+('2025-05-06 15:10:00', 3, 'Scheduled kitchenware transfer to West', 'Pending');
+
+INSERT INTO order_lines (order_id, item_id, from_warehouse_id, to_warehouse_id, quantity) VALUES
+(4, 105, 3, 1, 20),
+(4, 107, 3, 1, 10),
+(4, 108, 3, 1, 8),
+(5, 6, 2, 2, 7),
+(5, 7, 2, 2, 12),
+(5, 8, 2, 2, 9),
+(6, 95, 2, 1, 15),
+(6, 87, 2, 1, 5),
+(6, 76, 2, 1, 6),
+(7, 14, 1, 3, 10),
+(7, 4, 1, 3, 13),
+(7, 5, 1, 3, 5),
+(8, 112, 2, 3, 11),
+(8, 114, 2, 3, 7),
+(8, 116, 2, 3, 9);
+
