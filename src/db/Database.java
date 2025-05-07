@@ -32,7 +32,7 @@ public class Database {
         cfg.setProperty("hibernate.connection.username", config.username == null ? "" : config.username);
         cfg.setProperty("hibernate.connection.password", config.password == null ? "" : config.password);
         cfg.setProperty("hibernate.dialect", dialect);
-        cfg.setProperty("hibernate.hbm2ddl.auto", "update"); // or validate/create
+        cfg.setProperty("hibernate.hbm2ddl.auto", "none"); // or validate/create
         cfg.setProperty("hibernate.show_sql", "true");
 
         // Register entity classes here:
