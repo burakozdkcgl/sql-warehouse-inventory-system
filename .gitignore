@@ -74,4 +74,3 @@ Thumbs.db
 *.rej
 *.sublime-workspace
 *.sublime-project
-*.sqlite

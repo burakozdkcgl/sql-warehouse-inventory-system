@@ -49,7 +49,6 @@ public class Database {
 
         sessionFactory = cfg.buildSessionFactory(registry);
 
-        Session.getInstance().setDBMS(config.dbms);
     }
 
     public static SessionFactory getSessionFactory() {
@@ -78,7 +77,7 @@ public class Database {
             case "mysql" -> "jdbc:mysql://" + config.host + ":" + config.port + "/" + config.dbName;
             case "postgresql" -> "jdbc:postgresql://" + config.host + ":" + config.port + "/" + config.dbName;
             case "sqlserver" -> "jdbc:sqlserver://" + config.host + ":" + config.port + ";databaseName=" + config.dbName;
-            case "sqlite" -> "jdbc:sqlite:" + config.dbName;
+            case "sqlite" -> "jdbc:sqlite:" + config.dbName + "?foreign_keys=on";
             default -> throw new IllegalArgumentException("Unsupported DBMS: " + dbms);
         };
     }

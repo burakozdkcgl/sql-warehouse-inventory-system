@@ -19,10 +19,10 @@ import java.util.List;
 public class InventoryPanel extends JPanel {
 
     private int currentIndex = 0;
-    private List<Warehouse> warehouses;
+    private final List<Warehouse> warehouses;
     private JTextField searchField;
     private JScrollPane tableScroll;
-    private JPanel warehouseDisplayPanel;
+    private final JPanel warehouseDisplayPanel;
 
     public InventoryPanel() {
         setLayout(new GridBagLayout());

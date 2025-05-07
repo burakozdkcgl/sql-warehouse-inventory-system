@@ -6,7 +6,6 @@ public class Session {
 
     private static Session instance;
     private User currentUser;
-    private String DBMS;
     private boolean isFullscreen;
 
     public static Session getInstance() {
@@ -23,14 +22,6 @@ public class Session {
 
     public User getCurrentUser() {
         return currentUser;
-    }
-
-    public void setDBMS(String dbms) {
-        this.DBMS = dbms;
-    }
-
-    public String getCurrentDBMS() {
-        return DBMS;
     }
 
     public void setFullscreen(boolean isFullscreen){

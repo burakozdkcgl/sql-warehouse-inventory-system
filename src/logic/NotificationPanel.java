@@ -7,13 +7,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class NotificationPanel extends JPanel {
-    private final JLabel messageLabel;
 
     public NotificationPanel(String message,String colour) {
         setLayout(new BorderLayout());
         setOpaque(false);
 
-        messageLabel = new JLabel(message, SwingConstants.CENTER);
+        JLabel messageLabel = new JLabel(message, SwingConstants.CENTER);
         messageLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         messageLabel.setForeground(Color.WHITE);
         messageLabel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));

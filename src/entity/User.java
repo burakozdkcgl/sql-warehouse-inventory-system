@@ -43,8 +43,8 @@ public class User {
     private String role;
 
     // Picture from user_pictures table
-    @Lob
-    @Column(table = "user_pictures", name = "user_picture", columnDefinition = "MEDIUMBLOB")
+    @Basic
+    @Column(table = "user_pictures", name = "user_picture")
     private byte[] picture;
 
     // Self-referencing manager_id from user_managers table

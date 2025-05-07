@@ -273,7 +273,7 @@ public class OrderPanel extends JPanel {
                 Order order = new Order();
                 order.setCreatedAt(LocalDateTime.now());
                 order.setCreatedBy(Session.getInstance().getCurrentUser().getId());
-                order.setDescription(((JTextField) ((JPanel) ((JPanel) orderLinesBox.getParent()).getComponent(1)).getComponent(1)).getText());
+                order.setDescription(((JTextField) ((JPanel) orderLinesBox.getParent().getComponent(1)).getComponent(1)).getText());
                 order.setStatus("Pending");
 
                 List<OrderLine> lines = new ArrayList<>();

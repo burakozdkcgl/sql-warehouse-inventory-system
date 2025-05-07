@@ -1,130 +1,116 @@
-CREATE TABLE `users` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(255),
-  `username` varchar(50) NOT NULL,
-  `email` varchar(255),
-  `role` varchar(255),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `username` (`username`)
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE users (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT,
+  username TEXT NOT NULL UNIQUE,
+  email TEXT,
+  role TEXT
 );
 
-CREATE TABLE `warehouses` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `name` varchar(50) NOT NULL,
-  `location` varchar(255),
-  `description` varchar(255),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `name` (`name`)
+CREATE TABLE warehouses (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL UNIQUE,
+  location TEXT,
+  description TEXT
 );
 
-CREATE TABLE `items` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `category` varchar(50),
-  `sku` varchar(50) NOT NULL,
-  `name` varchar(50),
-  `description` varchar(255),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `sku` (`sku`)
+CREATE TABLE items (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  category TEXT,
+  sku TEXT NOT NULL UNIQUE,
+  name TEXT,
+  description TEXT
 );
 
 CREATE TABLE inventory (
-  warehouse_id INT NOT NULL,
-  item_id INT NOT NULL,
-  quantity INT NOT NULL DEFAULT 0,
-  reorder_level INT NOT NULL DEFAULT 0,
+  warehouse_id INTEGER NOT NULL,
+  item_id INTEGER NOT NULL,
+  quantity INTEGER NOT NULL DEFAULT 0,
+  reorder_level INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (warehouse_id, item_id),
   FOREIGN KEY (warehouse_id) REFERENCES warehouses(id) ON DELETE CASCADE,
   FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE
 );
 
 CREATE TABLE orders (
-  id INT NOT NULL AUTO_INCREMENT,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
   created_at DATETIME NOT NULL,
-  created_by INT,
-  description VARCHAR(255),
-  status VARCHAR(50) NOT NULL,
-  PRIMARY KEY (id),
+  created_by INTEGER,
+  description TEXT,
+  status TEXT NOT NULL,
   FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL
 );
 
 CREATE TABLE order_lines (
-  id INT NOT NULL AUTO_INCREMENT,
-  order_id INT NOT NULL,
-  item_id INT NOT NULL,
-  from_warehouse_id INT,
-  to_warehouse_id INT,
-  quantity INT NOT NULL,
-  PRIMARY KEY (id),
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  order_id INTEGER NOT NULL,
+  item_id INTEGER NOT NULL,
+  from_warehouse_id INTEGER,
+  to_warehouse_id INTEGER,
+  quantity INTEGER NOT NULL,
   FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE,
   FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE,
   FOREIGN KEY (from_warehouse_id) REFERENCES warehouses(id) ON DELETE CASCADE,
   FOREIGN KEY (to_warehouse_id) REFERENCES warehouses(id) ON DELETE CASCADE
 );
 
-CREATE TABLE `user_passwords` (
-  `user_id` int NOT NULL,
-  `password` varchar(255) NOT NULL,
-  PRIMARY KEY (`user_id`),
-  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+CREATE TABLE user_passwords (
+  user_id INTEGER NOT NULL,
+  password TEXT NOT NULL,
+  PRIMARY KEY (user_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE `user_managers` (
-  `user_id` int NOT NULL,
-  `manager_id` int DEFAULT NULL,
-  PRIMARY KEY (`user_id`),
-  KEY `manager_id` (`manager_id`),
-  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
-  FOREIGN KEY (`manager_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+CREATE TABLE user_managers (
+  user_id INTEGER NOT NULL,
+  manager_id INTEGER,
+  PRIMARY KEY (user_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (manager_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
-CREATE TABLE `user_pictures` (
-  `user_id` int NOT NULL,
-  `user_picture` MEDIUMBLOB DEFAULT NULL,
-  PRIMARY KEY (`user_id`),
-  FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+CREATE TABLE user_pictures (
+  user_id INTEGER NOT NULL,
+  user_picture BLOB DEFAULT NULL,
+  PRIMARY KEY (user_id),
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-INSERT INTO `users` VALUES
-(1,'admin','admin','admin@example.com','admin');
-INSERT INTO `user_passwords` VALUES
-(1,'admin');
+INSERT INTO users (id, name, username, email, role) VALUES
+(1, 'admin', 'admin', 'admin@example.com', 'admin');
+INSERT INTO user_passwords (user_id, password) VALUES
+(1, 'admin');
 
 
+INSERT INTO users (id, name, username, email, role) VALUES
+(2, 'Ferhunde Güven', 'ferhundee', 'benferhunde@example.com', 'admin'),
+(3, 'Oğuz Ayhan', 'oguz', 'oguz@example.com', 'manager'),
+(4, 'Sedef Turan', 'sedef', 'bucurkiz@example.com', 'manager'),
+(5, 'Hayriye Tekin', 'hayriye', 'amanagzimizintadi@example.com', 'manager'),
+(6, 'Şevket Tekin', 'sevket', 'sevket@example.com', 'employee'),
+(7, 'Cevriye Başsoy', 'cevriyehanim', 'ethan@example.com', 'employee'),
+(8, 'Ceyda Ayhan', 'ceyda', 'ceydaa@example.com', 'employee'),
+(9, 'Fikret Tekin', 'fiko', 'fiko@example.com', 'employee'),
+(10, 'Neyyir Genç', 'nehirhanim', 'nehrr@example.com', 'guest');
 
-
-
-
-
-
-
-INSERT INTO `users` VALUES
-(2,'Ferhunde Güven','ferhundee','benferhunde@example.com','admin'),
-(3,'Oğuz Ayhan','oguz','oguz@example.com','manager'),
-(4,'Sedef Turan','sedef','bucurkiz@example.com','manager'),
-(5,'Hayriye Tekin','hayriye','amanagzimizintadi@example.com','manager'),
-(6,'Şevket Tekin','sevket','sevket@example.com','employee'),
-(7,'Cevriye Başsoy','cevriyehanim','ethan@example.com','employee'),
-(8,'Ceyda Ayhan','ceyda','ceydaa@example.com','employee'),
-(9,'Fikret Tekin','fiko','fiko@example.com','employee'),
-(10,'Neyyir Genç','nehirhanim','nehrr@example.com','guest');
-
-INSERT INTO `user_passwords` VALUES
-(2,'password'),
-(3,'password'),
-(4,'password'),
-(5,'password'),
-(6,'password'),
-(7,'password'),
-(8,'password'),
-(9,'password'),
-(10,'password');
+INSERT INTO user_passwords (user_id, password) VALUES
+(2, 'password'),
+(3, 'password'),
+(4, 'password'),
+(5, 'password'),
+(6, 'password'),
+(7, 'password'),
+(8, 'password'),
+(9, 'password'),
+(10, 'password');
 
 INSERT INTO user_managers (user_id, manager_id) VALUES
 (6, 3),
 (8, 3),
 (9, 5);
 
-INSERT INTO `warehouses` (`name`, `location`, `description`) VALUES
+INSERT INTO warehouses (name, location, description) VALUES
 ('Central Depot', '123 Main St, Springfield', 'Main storage facility for regional distribution'),
 ('West Hub', '456 Industrial Rd, Shelbyville', 'Warehouse for western area logistics'),
 ('East Storage', '789 Warehouse Ln, Capital City', 'Storage for surplus inventory and seasonal items');
@@ -251,6 +237,7 @@ INSERT INTO `items` (`category`, `sku`, `name`, `description`) VALUES
 ('White Goods', 'W-009', 'Range Hood', 'A wall-mounted range hood with strong suction and LED lighting.'),
 ('White Goods', 'W-010', 'Dehumidifier', 'A high-capacity dehumidifier with auto-shutoff and continuous drain option.');
 
+
 INSERT INTO inventory (warehouse_id, item_id, quantity, reorder_level) VALUES
 (1, 82, 39, 15),
 (1, 15, 21, 25),
@@ -332,4 +319,5 @@ INSERT INTO order_lines (order_id, item_id, from_warehouse_id, to_warehouse_id, 
 (5, 112, 2, 3, 11),
 (5, 114, 2, 3, 7),
 (5, 116, 2, 3, 9);
+
 
