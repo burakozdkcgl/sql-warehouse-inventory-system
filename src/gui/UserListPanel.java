@@ -3,6 +3,7 @@ package gui;
 import db.Database;
 import entity.User;
 import logic.App;
+import logic.Language;
 import org.hibernate.Session;
 
 import javax.imageio.ImageIO;
@@ -13,6 +14,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class UserListPanel extends JPanel {
@@ -29,7 +31,7 @@ public class UserListPanel extends JPanel {
         ));
         whiteBox.setPreferredSize(new Dimension(950, 620));
 
-        JLabel title = new JLabel("User List", SwingConstants.CENTER);
+        JLabel title = new JLabel(Language.get("user.list"), SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 22));
         title.setForeground(new Color(40, 40, 40));
         whiteBox.add(title, BorderLayout.NORTH);
@@ -74,8 +76,11 @@ public class UserListPanel extends JPanel {
                 BorderFactory.createLineBorder(new Color(220, 220, 220)),
                 new EmptyBorder(10, 10, 10, 10)
         ));
-
-        JLabel roleLabel = new JLabel(role.substring(0, 1).toUpperCase() + role.substring(1));
+        JLabel roleLabel = null;
+        if (Objects.equals(role, "admin")) roleLabel = new JLabel(Language.get("user.admin"));
+        if (Objects.equals(role, "manager")) roleLabel = new JLabel(Language.get("user.manager"));
+        if (Objects.equals(role, "employee")) roleLabel = new JLabel(Language.get("user.employee"));
+        if (Objects.equals(role, "guest")) roleLabel = new JLabel(Language.get("user.guest"));
         roleLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
         roleLabel.setForeground(new Color(60, 60, 60));
         roleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -138,13 +143,13 @@ public class UserListPanel extends JPanel {
         JPanel info = new JPanel();
         info.setLayout(new BoxLayout(info, BoxLayout.Y_AXIS));
         info.setOpaque(false);
-        info.add(new JLabel("Name: " + user.getName()));
-        info.add(new JLabel("Username: " + user.getUsername()));
+        info.add(new JLabel(Language.get("user.name")+": " + user.getName()));
+        info.add(new JLabel(Language.get("user.username")+": " + user.getUsername()));
         if (user.getManager() != null)
-            info.add(new JLabel("Manager: " + user.getManager().getName()));
+            info.add(new JLabel(Language.get("user.manager")+": " + user.getManager().getName()));
         card.add(info, BorderLayout.CENTER);
 
-        JButton visitButton = new JButton("Visit Profile");
+        JButton visitButton = new JButton(Language.get("user.visit"));
         visitButton.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         visitButton.setBackground(new Color(70, 130, 180));
         visitButton.setForeground(Color.WHITE);

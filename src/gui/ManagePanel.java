@@ -6,6 +6,7 @@ import entity.Item;
 import entity.User;
 import entity.Warehouse;
 import logic.App;
+import logic.Language;
 import logic.NotificationPanel;
 import logic.Session;
 
@@ -15,7 +16,8 @@ import java.awt.*;
 import java.util.List;
 import java.util.Objects;
 
-public class ManagePanel extends JPanel {
+public class
+ManagePanel extends JPanel {
 
     public ManagePanel() {
         setLayout(new GridBagLayout());
@@ -31,9 +33,9 @@ public class ManagePanel extends JPanel {
 
         JLabel title;
         if (Objects.equals(Session.getInstance().getCurrentUser().getRole(), "admin"))
-            title = new JLabel("Admin Panel", SwingConstants.CENTER);
+            title = new JLabel(Language.get("manage.admintitle"), SwingConstants.CENTER);
         else
-            title = new JLabel("Manager Panel", SwingConstants.CENTER);
+            title = new JLabel(Language.get("manage.managertitle"), SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 22));
         whiteBox.add(title, BorderLayout.NORTH);
 
@@ -43,15 +45,15 @@ public class ManagePanel extends JPanel {
         content.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         content.add(Box.createVerticalStrut(15));
-        content.add(createSectionPanel("Set Reorder Levels", createReorderForm()));
+        content.add(createSectionPanel(Language.get("manage.set_reorder_levels"), createReorderForm()));
         content.add(Box.createVerticalStrut(15));
-        content.add(createSectionPanel("Manage Users", createUserManagementPanel()));
+        content.add(createSectionPanel(Language.get("manage.manage_users"), createUserManagementPanel()));
         content.add(Box.createVerticalStrut(15));
-        content.add(createSectionPanel("Manage Items", createItemManagementPanel()));
+        content.add(createSectionPanel(Language.get("manage.manage_items"), createItemManagementPanel()));
         content.add(Box.createVerticalStrut(15));
-        content.add(createSectionPanel("Delete Inventory Records", createInventoryManagementPanel()));
+        content.add(createSectionPanel(Language.get("manage.delete_inventory_records"), createInventoryManagementPanel()));
         content.add(Box.createVerticalStrut(15));
-        content.add(createSectionPanel("Manage Warehouses", createWarehouseManagementPanel()));
+        content.add(createSectionPanel(Language.get("manage.manage_warehouses"), createWarehouseManagementPanel()));
         content.add(Box.createVerticalStrut(15));
 
 
@@ -118,17 +120,17 @@ public class ManagePanel extends JPanel {
         JComboBox<Warehouse> warehouseBox = new JComboBox<>();
         JComboBox<Item> itemBox = new JComboBox<>();
         JSpinner reorderSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 1000000000, 1));
-        JButton saveBtn = createButton("Set Reorder Level");
+        JButton saveBtn = createButton(Language.get("manage.save"));
 
         warehouseBox.setPreferredSize(new Dimension(200, 25));
         itemBox.setPreferredSize(new Dimension(200, 25));
         reorderSpinner.setPreferredSize(new Dimension(80, 25));
 
-        form.add(new JLabel("Warehouse:"));
+        form.add(new JLabel(Language.get("warehouse.name")+":"));
         form.add(warehouseBox);
-        form.add(new JLabel("Item:"));
+        form.add(new JLabel(Language.get("item.name")+":"));
         form.add(itemBox);
-        form.add(new JLabel("Reorder:"));
+        form.add(new JLabel(Language.get("item.reorder")+":"));
         form.add(reorderSpinner);
         form.add(saveBtn);
 
@@ -180,9 +182,9 @@ public class ManagePanel extends JPanel {
                     inv.setReorderLevel((Integer) reorderSpinner.getValue());
                     session.merge(inv);
                     session.getTransaction().commit();
-                    NotificationPanel.show(App.getInstance().getLayeredPane(), "Reorder level updated", 3000, "green");
+                    NotificationPanel.show(App.getInstance().getLayeredPane(), Language.get("manage.nf1"), 3000, "green");
                 } else {
-                    NotificationPanel.show(App.getInstance().getLayeredPane(), "Inventory entry not found", 3000, "red");
+                    NotificationPanel.show(App.getInstance().getLayeredPane(), Language.get("manage.nf2"), 3000, "red");
                 }
             }
         });
@@ -198,11 +200,11 @@ public class ManagePanel extends JPanel {
         panel.setOpaque(false);
 
         // Main Buttons
-        JButton createUserBtn = createButton("Create a User");
-        JButton removeUserBtn = createButton("Delete a User");
-        JButton promoteUserBtn = createButton("Promote a User");
-        JButton depromoteUserBtn = createButton("Depromote a User");
-        JButton assignManagerBtn = createButton("Assign Manager to a User");
+        JButton createUserBtn = createButton(Language.get("manage.create_user"));
+        JButton removeUserBtn = createButton(Language.get("manage.delete_user"));
+        JButton promoteUserBtn = createButton(Language.get("manage.promote_user"));
+        JButton depromoteUserBtn = createButton(Language.get("manage.demote_user"));
+        JButton assignManagerBtn = createButton(Language.get("manage.assign_manager"));
 
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 10));
@@ -271,8 +273,8 @@ public class ManagePanel extends JPanel {
         panel.setOpaque(false);
 
         JComboBox<User> userBox = new JComboBox<>();
-        JButton deleteBtn = createButton("Delete");
-        JButton backBtn = createButton("Back");
+        JButton deleteBtn = createButton(Language.get("manage.delete"));
+        JButton backBtn = createButton(Language.get("manage.back"));
 
         try (org.hibernate.Session session = Database.getSessionFactory().openSession()) {
             session.createQuery("FROM User", User.class).list().forEach(userBox::addItem);
@@ -303,8 +305,8 @@ public class ManagePanel extends JPanel {
         panel.setOpaque(false);
 
         JComboBox<User> userBox = new JComboBox<>();
-        JButton confirmBtn = createButton(promote ? "Promote" : "Depromote");
-        JButton backBtn = createButton("Back");
+        JButton confirmBtn = createButton(promote ? Language.get("manage.promote_user") : Language.get("manage.demote_user"));
+        JButton backBtn = createButton(Language.get("manage.back"));
 
         try (org.hibernate.Session session = Database.getSessionFactory().openSession()) {
             session.createQuery("FROM User", User.class).list().forEach(user -> {
@@ -341,7 +343,7 @@ public class ManagePanel extends JPanel {
                 session.getTransaction().commit();
 
                 NotificationPanel.show(App.getInstance().getLayeredPane(),
-                        "User " + (promote ? "promoted" : "depromoted"), 3000, "green");
+                        Language.get(promote ? "manage.nf3" : "manage.nf4"), 3000, "green");
                 if (Objects.equals(selected.getId(), Session.getInstance().getCurrentUser().getId())) {
                     Session.getInstance().setCurrentUser(selected); // refresh session user
                     App.getInstance().setScreen(new MainPanel()); // re-invoke with updated role
@@ -371,8 +373,8 @@ public class ManagePanel extends JPanel {
 
         JComboBox<User> employeeBox = new JComboBox<>();
         JComboBox<User> managerBox = new JComboBox<>();
-        JButton assignBtn = createButton("Assign");
-        JButton backBtn = createButton("Back");
+        JButton assignBtn = createButton(Language.get("manage.save"));
+        JButton backBtn = createButton(Language.get("manage.back"));
 
         managerBox.addItem(null); // Blank option
 
@@ -383,9 +385,9 @@ public class ManagePanel extends JPanel {
             });
         }
 
-        panel.add(new JLabel("User:"));
+        panel.add(new JLabel(Language.get("user.employee")+":"));
         panel.add(employeeBox);
-        panel.add(new JLabel("Manager:"));
+        panel.add(new JLabel(Language.get("user.manager")+":"));
         panel.add(managerBox);
         panel.add(assignBtn);
         panel.add(backBtn);
@@ -400,9 +402,9 @@ public class ManagePanel extends JPanel {
                 employee.setManager(manager);
                 session.merge(employee);
                 session.getTransaction().commit();
-                NotificationPanel.show(App.getInstance().getLayeredPane(), "Manager assigned", 3000, "green");
+                NotificationPanel.show(App.getInstance().getLayeredPane(), Language.get("manage.nf5"), 3000, "green");
             } catch (Exception ex) {
-                NotificationPanel.show(App.getInstance().getLayeredPane(), "Assignment failed", 3000, "red");
+                NotificationPanel.show(App.getInstance().getLayeredPane(), Language.get("manage.nf6"), 3000, "red");
             }
         });
 
@@ -442,7 +444,7 @@ public class ManagePanel extends JPanel {
         Item placeholder = new Item() {
             @Override
             public String toString() {
-                return "+ Add New";
+                return Language.get("manage.add_new");
             }
         };
         itemListModel.addElement(placeholder);
@@ -453,7 +455,7 @@ public class ManagePanel extends JPanel {
 
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setOpaque(false);
-        formPanel.setBorder(BorderFactory.createTitledBorder("Item Details"));
+        formPanel.setBorder(BorderFactory.createTitledBorder(Language.get("manage.item_details")));
 
         JLabel modeLabel = new JLabel();
         modeLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -464,9 +466,9 @@ public class ManagePanel extends JPanel {
         JTextField categoryField = new JTextField(20);
         JTextField descriptionField = new JTextField(20);
 
-        JButton saveBtn = createButton("Save");
-        JButton deleteBtn = createButton("Delete");
-        JButton cancelBtn = createButton("Cancel");
+        JButton saveBtn = createButton(Language.get("manage.save"));
+        JButton deleteBtn = createButton(Language.get("manage.delete"));
+        JButton cancelBtn = createButton(Language.get("manage.cancel"));
 
         final Item[] currentEdit = {null};
 
@@ -481,22 +483,22 @@ public class ManagePanel extends JPanel {
         gbc.gridwidth = 1;
 
         gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("Name:"), gbc);
+        formPanel.add(new JLabel(Language.get("item.name")+":"), gbc);
         gbc.gridx = 1;
         formPanel.add(nameField, gbc); row++;
 
         gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("SKU:"), gbc);
+        formPanel.add(new JLabel(Language.get("item.sku")+":"), gbc);
         gbc.gridx = 1;
         formPanel.add(skuField, gbc); row++;
 
         gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("Category:"), gbc);
+        formPanel.add(new JLabel(Language.get("item.category")+":"), gbc);
         gbc.gridx = 1;
         formPanel.add(categoryField, gbc); row++;
 
         gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("Description:"), gbc);
+        formPanel.add(new JLabel(Language.get("item.description")+":"), gbc);
         gbc.gridx = 1;
         formPanel.add(descriptionField, gbc); row++;
 
@@ -516,14 +518,14 @@ public class ManagePanel extends JPanel {
             skuField.setText("");
             categoryField.setText("");
             descriptionField.setText("");
-            modeLabel.setText("Creating New Item");
+            modeLabel.setText(Language.get("manage.create_item"));
         };
 
         itemJList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 Item selected = itemJList.getSelectedValue();
                 if (selected == null) return;
-                if (selected.toString().equals("+ Add New")) {
+                if (selected.toString().equals(Language.get("manage.add_new"))) {
                     itemJList.clearSelection();
                     clearForm.run();
                     return;
@@ -533,7 +535,7 @@ public class ManagePanel extends JPanel {
                 skuField.setText(selected.getSku());
                 categoryField.setText(selected.getCategory());
                 descriptionField.setText(selected.getDescription());
-                modeLabel.setText("Editing: " + selected.getName());
+                modeLabel.setText(Language.get("manage.editing")+": " + selected.getName());
             }
         });
 
@@ -549,7 +551,7 @@ public class ManagePanel extends JPanel {
             String desc = descriptionField.getText().trim();
 
             if (name.isEmpty() || sku.isEmpty()) {
-                NotificationPanel.show(App.getInstance().getLayeredPane(), "Name and SKU required", 3000, "red");
+                NotificationPanel.show(App.getInstance().getLayeredPane(), Language.get("manage.nf7"), 3000, "red");
                 return;
             }
 
@@ -563,7 +565,7 @@ public class ManagePanel extends JPanel {
                     item.setDescription(desc);
                     session.persist(item);
                     itemListModel.insertElementAt(item, itemListModel.getSize() - 1);
-                    NotificationPanel.show(App.getInstance().getLayeredPane(), "Item added", 3000, "green");
+                    NotificationPanel.show(App.getInstance().getLayeredPane(), Language.get("manage.nf8"), 3000, "green");
                 } else {
                     currentEdit[0].setName(name);
                     currentEdit[0].setSku(sku);
@@ -571,11 +573,11 @@ public class ManagePanel extends JPanel {
                     currentEdit[0].setDescription(desc);
                     session.merge(currentEdit[0]);
                     itemJList.repaint();
-                    NotificationPanel.show(App.getInstance().getLayeredPane(), "Item updated", 3000, "green");
+                    NotificationPanel.show(App.getInstance().getLayeredPane(), Language.get("manage.nf9"), 3000, "green");
                 }
                 session.getTransaction().commit();
             } catch (Exception ex) {
-                NotificationPanel.show(App.getInstance().getLayeredPane(), "Save failed", 3000, "red");
+                NotificationPanel.show(App.getInstance().getLayeredPane(), Language.get("manage.nf10"), 3000, "red");
             }
             clearForm.run();
         });
@@ -583,7 +585,7 @@ public class ManagePanel extends JPanel {
         deleteBtn.addActionListener(e -> {
 
             Item selected = itemJList.getSelectedValue();
-            if (selected == null || selected.toString().equals("+ Add New")) return;
+            if (selected == null || selected.toString().equals(Language.get("manage.add_new"))) return;
             App.getInstance().setScreen(new ManagePanelWindow(selected));
 
         });
@@ -612,7 +614,7 @@ public class ManagePanel extends JPanel {
         Warehouse placeholder = new Warehouse() {
             @Override
             public String toString() {
-                return "+ Add New";
+                return Language.get("manage.add_new");
             }
         };
         warehouseListModel.addElement(placeholder);
@@ -623,7 +625,7 @@ public class ManagePanel extends JPanel {
 
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setOpaque(false);
-        formPanel.setBorder(BorderFactory.createTitledBorder("Warehouse Details"));
+        formPanel.setBorder(BorderFactory.createTitledBorder(Language.get("manage.warehouse_details")));
 
         JLabel modeLabel = new JLabel();
         modeLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -633,9 +635,9 @@ public class ManagePanel extends JPanel {
         JTextField locationField = new JTextField(20);
         JTextField descriptionField = new JTextField(20);
 
-        JButton saveBtn = createButton("Save");
-        JButton deleteBtn = createButton("Delete");
-        JButton cancelBtn = createButton("Cancel");
+        JButton saveBtn = createButton(Language.get("manage.save"));
+        JButton deleteBtn = createButton(Language.get("manage.delete"));
+        JButton cancelBtn = createButton(Language.get("manage.cancel"));
 
         final Warehouse[] currentEdit = {null};
 
@@ -651,17 +653,17 @@ public class ManagePanel extends JPanel {
         gbc.gridwidth = 1;
 
         gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("Name:"), gbc);
+        formPanel.add(new JLabel(Language.get("warehouse.name")+":"), gbc);
         gbc.gridx = 1;
         formPanel.add(nameField, gbc); row++;
 
         gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("Location:"), gbc);
+        formPanel.add(new JLabel(Language.get("warehouse.location")+":"), gbc);
         gbc.gridx = 1;
         formPanel.add(locationField, gbc); row++;
 
         gbc.gridx = 0; gbc.gridy = row;
-        formPanel.add(new JLabel("Description:"), gbc);
+        formPanel.add(new JLabel(Language.get("warehouse.description")+":"), gbc);
         gbc.gridx = 1;
         formPanel.add(descriptionField, gbc); row++;
 
@@ -680,14 +682,14 @@ public class ManagePanel extends JPanel {
             nameField.setText("");
             locationField.setText("");
             descriptionField.setText("");
-            modeLabel.setText("Creating New Warehouse");
+            modeLabel.setText(Language.get("manage.create_warehouse"));
         };
 
         warehouseJList.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
                 Warehouse selected = warehouseJList.getSelectedValue();
                 if (selected == null) return;
-                if (selected.toString().equals("+ Add New")) {
+                if (selected.toString().equals(Language.get("manage.add_new"))) {
                     warehouseJList.clearSelection();
                     clearForm.run();
                     return;
@@ -696,7 +698,7 @@ public class ManagePanel extends JPanel {
                 nameField.setText(selected.getName());
                 locationField.setText(selected.getLocation());
                 descriptionField.setText(selected.getDescription());
-                modeLabel.setText("Editing: " + selected.getName());
+                modeLabel.setText(Language.get("manage.editing")+": " + selected.getName());
             }
         });
 
@@ -711,7 +713,7 @@ public class ManagePanel extends JPanel {
             String desc = descriptionField.getText().trim();
 
             if (name.isEmpty()) {
-                NotificationPanel.show(App.getInstance().getLayeredPane(), "Name required", 3000, "red");
+                NotificationPanel.show(App.getInstance().getLayeredPane(), Language.get("manage.nf11"), 3000, "red");
                 return;
             }
 
@@ -724,25 +726,25 @@ public class ManagePanel extends JPanel {
                     w.setDescription(desc);
                     session.persist(w);
                     warehouseListModel.insertElementAt(w, warehouseListModel.getSize() - 1);
-                    NotificationPanel.show(App.getInstance().getLayeredPane(), "Warehouse added", 3000, "green");
+                    NotificationPanel.show(App.getInstance().getLayeredPane(), Language.get("manage.nf12"), 3000, "green");
                 } else {
                     currentEdit[0].setName(name);
                     currentEdit[0].setLocation(loc);
                     currentEdit[0].setDescription(desc);
                     session.merge(currentEdit[0]);
                     warehouseJList.repaint();
-                    NotificationPanel.show(App.getInstance().getLayeredPane(), "Warehouse updated", 3000, "green");
+                    NotificationPanel.show(App.getInstance().getLayeredPane(), Language.get("manage.nf13"), 3000, "green");
                 }
                 session.getTransaction().commit();
             } catch (Exception ex) {
-                NotificationPanel.show(App.getInstance().getLayeredPane(), "Save failed", 3000, "red");
+                NotificationPanel.show(App.getInstance().getLayeredPane(), Language.get("manage.nf10"), 3000, "red");
             }
             clearForm.run();
         });
 
         deleteBtn.addActionListener(e -> {
             Warehouse selected = warehouseJList.getSelectedValue();
-            if (selected == null || selected.toString().equals("+ Add New")) return;
+            if (selected == null || selected.toString().equals(Language.get("manage.add_new"))) return;
             App.getInstance().setScreen(new ManagePanelWindow(selected));
         });
 
@@ -757,14 +759,14 @@ public class ManagePanel extends JPanel {
 
         JComboBox<Warehouse> warehouseBox = new JComboBox<>();
         JComboBox<Item> itemBox = new JComboBox<>();
-        JButton removeBtn = createButton("Remove");
+        JButton removeBtn = createButton(Language.get("manage.remove"));
 
         warehouseBox.setPreferredSize(new Dimension(200, 25));
         itemBox.setPreferredSize(new Dimension(200, 25));
 
-        panel.add(new JLabel("Warehouse:"));
+        panel.add(new JLabel(Language.get("warehouse.name")+":"));
         panel.add(warehouseBox);
-        panel.add(new JLabel("Item:"));
+        panel.add(new JLabel(Language.get("item.item")+":"));
         panel.add(itemBox);
         panel.add(removeBtn);
 

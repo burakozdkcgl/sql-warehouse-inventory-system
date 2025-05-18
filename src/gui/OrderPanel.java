@@ -4,6 +4,7 @@ import db.Database;
 import db.OrderService;
 import entity.*;
 import logic.App;
+import logic.Language;
 import logic.NotificationPanel;
 import logic.Session;
 
@@ -31,7 +32,7 @@ public class OrderPanel extends JPanel {
         ));
         whiteBox.setPreferredSize(new Dimension(950, 620));
 
-        JLabel title = new JLabel("Orders", SwingConstants.CENTER);
+        JLabel title = new JLabel(Language.get("order.title"), SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 22));
         title.setForeground(new Color(40, 40, 40));
         whiteBox.add(title, BorderLayout.NORTH);
@@ -42,9 +43,9 @@ public class OrderPanel extends JPanel {
 
 
 
-        tabs.addTab("Pending Orders", getOrderListTab("Pending"));
-        tabs.addTab("Create Order", getCreateOrderTab());
-        tabs.addTab("Inactive Orders", getOrderListTab("Inactive"));
+        tabs.addTab(Language.get("order.pending_orders"), getOrderListTab("Pending"));
+        tabs.addTab(Language.get("order.create_order"), getCreateOrderTab());
+        tabs.addTab(Language.get("order.inactive_orders"), getOrderListTab("Inactive"));
 
         whiteBox.add(tabs, BorderLayout.CENTER);
         whiteBox.add(Box.createVerticalStrut(20), BorderLayout.SOUTH);
@@ -95,7 +96,7 @@ public class OrderPanel extends JPanel {
                 JPanel info = new JPanel();
                 info.setLayout(new BoxLayout(info, BoxLayout.Y_AXIS)); // Line-by-line
 
-                JLabel id = new JLabel("Order #" + order.getId());
+                JLabel id = new JLabel(Language.get("order.order")+" #" + order.getId());
                 id.setFont(new Font("Segoe UI", Font.BOLD, 14));
 
 
@@ -105,19 +106,19 @@ public class OrderPanel extends JPanel {
                     info.add(createStatusLabel(order.getStatus()));
                 }
 
-                info.add(new JLabel("Created at: " + order.getFormattedCreatedAt()));
+                info.add(new JLabel(Language.get("order.created_at")+": " + order.getFormattedCreatedAt()));
 
                 Integer creatorId = order.getCreatedBy();
-                String createdByName = "Deleted User";
+                String createdByName = Language.get("user.deleted");
                 if (creatorId != null) {
                     User creator = session.get(User.class, creatorId);
                     if (creator != null) {
                         createdByName = creator.getName();
                     }
                 }
-                info.add(new JLabel("Created by: " + createdByName));
+                info.add(new JLabel(Language.get("order.created_by")+": " + createdByName));
 
-                if (order.getDescription() != null) info.add(new JLabel("Description: " + order.getDescription()));
+                if (order.getDescription() != null) info.add(new JLabel(Language.get("order.description")+": " + order.getDescription()));
 
                 for (OrderLine line : order.getOrderLines()) {
                     String text = "- " + line.getQuantity() + " x " + line.getItem().getName();
@@ -135,8 +136,8 @@ public class OrderPanel extends JPanel {
 
 
                 if ("Pending".equals(filterType)) {
-                    JButton approveBtn = new JButton("Approve Order");
-                    JButton cancelBtn = new JButton("Cancel Order");
+                    JButton approveBtn = new JButton(Language.get("order.approve"));
+                    JButton cancelBtn = new JButton(Language.get("order.cancel"));
                     approveBtn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
                     approveBtn.setBackground(new Color(70, 130, 180));
                     approveBtn.setForeground(Color.WHITE);
@@ -186,8 +187,16 @@ public class OrderPanel extends JPanel {
             case "Canceled" -> "red";
             default -> "black";
         };
-        return new JLabel(String.format("<html>Status: <span style='color:%s;'>%s</span></html>", color, status));
+
+        String translatedStatus = Language.get("order." + status.toLowerCase());
+        String translatedLabel = Language.get("order.status");
+
+        return new JLabel(String.format(
+                "<html>%s: <span style='color:%s;'>%s</span></html>",
+                translatedLabel, color, translatedStatus
+        ));
     }
+
 
 
 
@@ -229,10 +238,10 @@ public class OrderPanel extends JPanel {
 
 
     private JPanel getStyledButtonsRow(JPanel orderLinesBox) {
-        JButton addItemBtn = new JButton("Add Item");
-        JButton removeItemBtn = new JButton("Remove Item");
-        JButton transferItemBtn = new JButton("Transfer Item");
-        JButton submitBtn = new JButton("Submit Order");
+        JButton addItemBtn = new JButton(Language.get("order.add_item"));
+        JButton removeItemBtn = new JButton(Language.get("order.remove_item"));
+        JButton transferItemBtn = new JButton(Language.get("order.transfer_item"));
+        JButton submitBtn = new JButton(Language.get("order.submit_order"));
 
         for (JButton btn : new JButton[]{addItemBtn, removeItemBtn, transferItemBtn, submitBtn}) {
             btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -292,10 +301,10 @@ public class OrderPanel extends JPanel {
                 session.persist(order);
                 session.getTransaction().commit();
 
-                NotificationPanel.show(App.getInstance().getLayeredPane(), "Order created!", 3000, "green");
+                NotificationPanel.show(App.getInstance().getLayeredPane(), Language.get("order.success"), 3000, "green");
                 App.getInstance().setScreen(new OrderPanel());
             } catch (Exception ex) {
-                NotificationPanel.show(App.getInstance().getLayeredPane(), "Failed to create order!", 3000, "red");
+                NotificationPanel.show(App.getInstance().getLayeredPane(), Language.get("order.fail"), 3000, "red");
                 App.getInstance().setScreen(new OrderPanel());
             }
         });
@@ -315,7 +324,7 @@ public class OrderPanel extends JPanel {
     private JPanel labeled(JComponent comp) {
         JPanel panel = new JPanel(new BorderLayout(5, 5));
         panel.setOpaque(false);
-        JLabel label = new JLabel("Order description: (optional)");
+        JLabel label = new JLabel(Language.get("order.create_order_description"));
         label.setPreferredSize(new Dimension(200, 25));
         panel.add(label, BorderLayout.WEST);
         panel.add(comp, BorderLayout.CENTER);

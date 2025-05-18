@@ -4,6 +4,7 @@ import entity.Inventory;
 import entity.Order;
 import entity.OrderLine;
 import logic.App;
+import logic.Language;
 import logic.NotificationPanel;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -35,7 +36,7 @@ public class OrderService {
                     if (inv == null || inv.getQuantity() < entry.getValue()) {
                         tx.rollback();
                         NotificationPanel.show(App.getInstance().getLayeredPane(),
-                                "Not enough item in the inventory!",
+                                Language.get("order.order_could_not_approved"),
                                 3000, "red");
                         return false;
                     }
@@ -70,7 +71,9 @@ public class OrderService {
             }
 
             tx.commit();
-            NotificationPanel.show(App.getInstance().getLayeredPane(), "Order " + newStatus + "!", 3000, "green");
+            NotificationPanel.show(App.getInstance().getLayeredPane(),
+                    Language.get("order.order_" + newStatus.toLowerCase()),
+                    3000, "green");
             return true;
 
         } catch (Exception ex) {

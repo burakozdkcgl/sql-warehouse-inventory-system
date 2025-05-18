@@ -3,6 +3,7 @@ package gui;
 import db.Database;
 import entity.User;
 import logic.App;
+import logic.Language;
 import logic.Session;
 import org.hibernate.query.Query;
 
@@ -62,7 +63,7 @@ public class UserProfilePanel extends JPanel {
                 new EmptyBorder(30, 30, 30, 30)
         ));
 
-        JLabel title = new JLabel("User Profile", SwingConstants.CENTER);
+        JLabel title = new JLabel(Language.get("user.profile"), SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 22));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         box.add(title);
@@ -81,16 +82,16 @@ public class UserProfilePanel extends JPanel {
         passwordField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         passwordField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
 
-        box.add(createFieldPanel("Name:", nameField));
-        box.add(createFieldPanel("Username:", usernameField));
-        box.add(createFieldPanel("Email:", emailField));
+        box.add(createFieldPanel(Language.get("user.name")+":", nameField));
+        box.add(createFieldPanel(Language.get("user.username")+":", usernameField));
+        box.add(createFieldPanel(Language.get("user.email")+":", emailField));
 
-        passwordPanel = createFieldPanel("Password:", passwordField);
+        passwordPanel = createFieldPanel(Language.get("user.password")+":", passwordField);
         box.add(passwordPanel);
 
         JPanel managerPanel = new JPanel(new BorderLayout(10, 5));
         managerPanel.setOpaque(false);
-        JLabel mgrLabel = new JLabel("Manager:");
+        JLabel mgrLabel = new JLabel(Language.get("user.manager")+":");
         mgrLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
         mgrLabel.setPreferredSize(new Dimension(100, 30));
 
@@ -102,7 +103,7 @@ public class UserProfilePanel extends JPanel {
         managerLabelDisplay.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
         User manager = user.getManager();
-        String mgrText = (manager != null) ? manager.getName() + " (" + manager.getUsername() + ")" : "None";
+        String mgrText = (manager != null) ? manager.getName() + " (" + manager.getUsername() + ")" : Language.get("user.none");
         managerLabelDisplay.setText(mgrText);
 
         boolean hasPicture;
@@ -131,7 +132,7 @@ public class UserProfilePanel extends JPanel {
 
         box.add(Box.createVerticalStrut(20));
 
-        removePicButton = createButton("Remove Picture");
+        removePicButton = createButton(Language.get("user.remove_picture"));
         removePicButton.addActionListener(e -> handleRemovePicture(avatarLabel));
         if(hasPicture){
             box.add(removePicButton);
@@ -139,17 +140,17 @@ public class UserProfilePanel extends JPanel {
         }
 
 
-        changePicButton = createButton("Change Picture");
+        changePicButton = createButton(Language.get("user.change_picture"));
         changePicButton.addActionListener(e -> handleChangePicture(avatarLabel));
         box.add(changePicButton);
         box.add(Box.createVerticalStrut(10));
 
-        saveButton = createButton("Save Changes");
+        saveButton = createButton(Language.get("user.save"));
         saveButton.addActionListener(e -> saveChanges());
         box.add(saveButton);
 
         if (isSelf || isAdmin) {
-            editBackButton = createButton("Edit Profile");
+            editBackButton = createButton(Language.get("user.edit"));
             editBackButton.addActionListener(e -> toggleEditMode());
             box.add(Box.createVerticalStrut(10));
             box.add(editBackButton);
@@ -166,7 +167,7 @@ public class UserProfilePanel extends JPanel {
 
         if (isEditing) {
             enableEditing();
-            editBackButton.setText("Back");
+            editBackButton.setText(Language.get("user.back"));
         } else {
             disableEditing();
             App.getInstance().setScreen(new UserProfilePanel(user));
@@ -237,7 +238,6 @@ public class UserProfilePanel extends JPanel {
                 if(java.util.Arrays.equals(selectedPicture, profile_default_stream.readAllBytes())){
                     user.setPicture(null);
 
-                    System.out.println("za");
 
                     session.createNativeQuery("DELETE FROM user_pictures WHERE user_id = :userId")
                             .setParameter("userId", user.getId())
@@ -251,12 +251,12 @@ public class UserProfilePanel extends JPanel {
 
             session.update(user);
             session.getTransaction().commit();
-            logic.NotificationPanel.show(App.getInstance().getLayeredPane(), "Profile updated successfully!", 3000,"green");
+            logic.NotificationPanel.show(App.getInstance().getLayeredPane(), Language.get("user.success"), 3000,"green");
             App.getInstance().setScreen(new UserProfilePanel(user));
         } catch (Exception ex) {
             user = originalSessionUser;
             if (user.getId().equals(Session.getInstance().getCurrentUser().getId())) Session.getInstance().setCurrentUser(user);
-            logic.NotificationPanel.show(App.getInstance().getLayeredPane(), "Unable to update.", 3000,"red");
+            logic.NotificationPanel.show(App.getInstance().getLayeredPane(), Language.get("user.fail"), 3000,"red");
             App.getInstance().setScreen(new UserProfilePanel(user));
         }
     }

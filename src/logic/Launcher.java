@@ -83,14 +83,14 @@ public class Launcher extends JFrame {
                 String dbPath = ConfigManager.getConfig().dbName;
                 File sqliteFile = new File(dbPath);
                 if (!sqliteFile.exists()) {
-                    showError(statusLabel, "SQLite file does not exist: " + dbPath);
+                    showError(statusLabel, Language.get("launcher.sqlite_file_missing") + dbPath);
                     return;
                 }
             }
             try {
                 launchApp();
             } catch (Exception ex) {
-                showError(statusLabel, "Failed to launch application. Check connection.");
+                showError(statusLabel, Language.get("launcher.launch_failed"));
             }
         });
 
@@ -243,7 +243,7 @@ public class Launcher extends JFrame {
             saveBtn.addActionListener(e -> {
                 ConfigManager.fillConfig(dbms, hostField.getText(), portField.getText(), dbField.getText(), userField.getText(), passField.getText());
                 ConfigManager.saveConfig(dbms, hostField.getText(), portField.getText(), dbField.getText(), userField.getText(), passField.getText());
-                showError(statusLabel, "Configuration saved for " + dbms);
+                showError(statusLabel, Language.get("launcher.config_saved") + dbms);
             });
 
             launchBtn.addActionListener(e -> {
@@ -251,7 +251,7 @@ public class Launcher extends JFrame {
                 try {
                     launchApp();
                 } catch (Exception ex) {
-                    showError(statusLabel, "Failed to launch application. Check connection.");
+                    showError(statusLabel, Language.get("launcher.launch_failed"));
                 }
             });
         } else {
@@ -261,12 +261,12 @@ public class Launcher extends JFrame {
                 String dbPath = dbField.getText();
                 File sqliteFile = new File(dbPath);
                 if (!sqliteFile.exists()) {
-                    showError(statusLabel, "SQLite file does not exist: " + dbPath);
+                    showError(statusLabel, Language.get("launcher.sqlite_file_missing") + dbPath);
                     return;
                 }
                 ConfigManager.fillConfig(dbms, null, null, dbField.getText(), null, null);
                 ConfigManager.saveConfig(dbms, null, null, dbField.getText(), null, null);
-                showError(statusLabel, "Configuration saved for " + dbms);
+                showError(statusLabel, Language.get("launcher.config_saved") + dbms);
             });
 
             launchBtn.addActionListener(e -> {
@@ -274,13 +274,13 @@ public class Launcher extends JFrame {
                 String dbPath = ConfigManager.getConfig().dbName;
                 File sqliteFile = new File(dbPath);
                 if (!sqliteFile.exists()) {
-                    showError(statusLabel, "SQLite file does not exist: " + dbPath);
+                    showError(statusLabel, Language.get("launcher.sqlite_file_missing") + dbPath);
                     return;
                 }
                 try {
                     launchApp();
                 } catch (Exception ex) {
-                    showError(statusLabel, "Failed to launch application. Check connection.");
+                    showError(statusLabel, Language.get("launcher.launch_failed"));
                 }
             });
 

@@ -6,6 +6,7 @@ import entity.Item;
 import entity.User;
 import entity.Warehouse;
 import logic.App;
+import logic.Language;
 import logic.NotificationPanel;
 import logic.Session;
 
@@ -20,7 +21,7 @@ public class ManagePanelWindow extends JPanel {
         setOpaque(false);
 
         JPanel box = createBoxPanel();
-        JLabel title = new JLabel(isCreation ? "Create New User" : "Unknown", SwingConstants.CENTER);
+        JLabel title = new JLabel(isCreation ? Language.get("manage.create_user") : "Unknown", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 22));
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         box.add(title);
@@ -32,12 +33,12 @@ public class ManagePanelWindow extends JPanel {
 
         JComboBox<String> roleBox = new JComboBox<>(new String[]{"employee", "manager", "admin", "guest"});
 
-        box.add(createField("Name", nameField));
-        box.add(createField("Username", usernameField));
-        box.add(createField("Email", emailField));
-        box.add(createField("Role", roleBox));
+        box.add(createField(Language.get("user.name"), nameField));
+        box.add(createField(Language.get("user.username"), usernameField));
+        box.add(createField(Language.get("user.email"), emailField));
+        box.add(createField(Language.get("user.role"), roleBox));
 
-        JButton createBtn = createButton("Create");
+        JButton createBtn = createButton(Language.get("manage.create_user"));
         createBtn.addActionListener(e -> {
             user.setName(nameField.getText().trim());
             user.setUsername(usernameField.getText().trim());
@@ -49,31 +50,31 @@ public class ManagePanelWindow extends JPanel {
                 session.beginTransaction();
                 session.persist(user);
                 session.getTransaction().commit();
-                NotificationPanel.show(App.getInstance().getLayeredPane(), "User created", 3000, "green");
+                NotificationPanel.show(App.getInstance().getLayeredPane(), Language.get("manage.nf14"), 3000, "green");
                 App.getInstance().setScreen(new ManagePanel());
             } catch (Exception ex) {
-                NotificationPanel.show(App.getInstance().getLayeredPane(), "Creation failed", 3000, "red");
+                NotificationPanel.show(App.getInstance().getLayeredPane(), Language.get("manage.nf15"), 3000, "red");
             }
         });
 
-        JButton cancelBtn = createButton("Cancel");
+        JButton cancelBtn = createButton(Language.get("manage.cancel"));
         cancelBtn.addActionListener(e -> App.getInstance().setScreen(new ManagePanel()));
 
 
         box.add(Box.createVerticalStrut(20));
 
-        JLabel line1 = new JLabel("User's password will be set to 'password'", SwingConstants.CENTER);
+        JLabel line1 = new JLabel(Language.get("manage.create_user_text1"), SwingConstants.CENTER);
         line1.setFont(new Font("Segoe UI", Font.BOLD, 12));
         line1.setAlignmentX(Component.CENTER_ALIGNMENT);
         box.add(line1);
 
 
-        JLabel line2 = new JLabel("Users can set a new password after their first login from their profile", SwingConstants.CENTER);
+        JLabel line2 = new JLabel(Language.get("manage.create_user_text2"), SwingConstants.CENTER);
         line2.setFont(new Font("Segoe UI", Font.BOLD, 12));
         line2.setAlignmentX(Component.CENTER_ALIGNMENT);
         box.add(line2);
 
-        JLabel line3 = new JLabel("Admins also can change details by visiting user profiles from user list", SwingConstants.CENTER);
+        JLabel line3 = new JLabel(Language.get("manage.create_user_text3"), SwingConstants.CENTER);
         line3.setFont(new Font("Segoe UI", Font.BOLD, 12));
         line3.setAlignmentX(Component.CENTER_ALIGNMENT);
         box.add(line3);
@@ -92,13 +93,13 @@ public class ManagePanelWindow extends JPanel {
     }
 
     public ManagePanelWindow(User user) {
-        String message = "Are you sure you want to delete this user?";
+        String message =Language.get("manage.confirm_user_delete");
         String info = user.toString();
         confirmAndDelete(user, User.class, message, info);
     }
 
     public ManagePanelWindow(Item item) {
-        String message = "Are you sure you want to delete this item?";
+        String message = Language.get("manage.confirm_item_delete");
         String info = item.toString();
 
 
@@ -106,14 +107,14 @@ public class ManagePanelWindow extends JPanel {
     }
 
     public ManagePanelWindow(Inventory inventory) {
-        String message = "Are you sure you want to delete this record?";
+        String message = Language.get("manage.confirm_inventory_delete");
         String info = inventory.toString();
         confirmAndDelete(inventory, Inventory.class, message, info);
     }
 
 
     public ManagePanelWindow(Warehouse warehouse) {
-        String message = "Are you sure you want to delete this warehouse?";
+        String message = Language.get("manage.confirm_warehouse_delete");
         String info = warehouse.toString();
 
 
@@ -139,8 +140,8 @@ public class ManagePanelWindow extends JPanel {
         box.add(info);
         box.add(Box.createVerticalStrut(20));
 
-        JButton yesBtn = createButton("Yes, Delete");
-        JButton noBtn = createButton("Cancel");
+        JButton yesBtn = createButton(Language.get("manage.yes_delete"));
+        JButton noBtn = createButton(Language.get("manage.cancel"));
 
         yesBtn.addActionListener(e -> {
             try (org.hibernate.Session session = Database.getSessionFactory().openSession()) {
@@ -166,9 +167,9 @@ public class ManagePanelWindow extends JPanel {
                     App.getInstance().setScreen(new ManagePanel());
                 }
 
-                NotificationPanel.show(App.getInstance().getLayeredPane(), "Deleted entity", 3000, "green");
+                NotificationPanel.show(App.getInstance().getLayeredPane(), Language.get("manage.nf16"), 3000, "green");
             } catch (Exception ex) {
-                NotificationPanel.show(App.getInstance().getLayeredPane(), "Deletion failed", 3000, "red");
+                NotificationPanel.show(App.getInstance().getLayeredPane(), Language.get("manage.nf17"), 3000, "red");
             }
         });
 
