@@ -2,6 +2,7 @@ package gui;
 
 import db.Database;
 import entity.User;
+import logic.Language;
 import logic.Session;
 import org.hibernate.query.Query;
 import org.jfree.chart.ChartFactory;
@@ -39,17 +40,17 @@ public class MainPanel extends JPanel {
         whiteBox.setPreferredSize(new Dimension(950, 620));
 
         // Header
-        JLabel welcomeLabel = new JLabel("Welcome, " + user.getName(), SwingConstants.CENTER);
+        JLabel welcomeLabel = new JLabel(Language.get("dashboard.welcome")+", " + user.getName(), SwingConstants.CENTER);
         welcomeLabel.setFont(new Font("Arial", Font.BOLD, 18));
         whiteBox.add(welcomeLabel, BorderLayout.NORTH);
 
         // Top Stats
         JPanel statsRow = new JPanel(new GridLayout(1, 5, 15, 10));
-        statsRow.add(createStatCard("Item Types", getCount("Item")));
-        statsRow.add(createStatCard("Below Reorder", getItemsBelowReorderCount()));
-        statsRow.add(createStatCard("Warehouses", getCount("Warehouse")));
-        statsRow.add(createStatCard("Users", getCount("User")));
-        statsRow.add(createStatCard("Pending Orders", getPendingOrderCount()));
+        statsRow.add(createStatCard(Language.get("dashboard.item_types"), getCount("Item")));
+        statsRow.add(createStatCard(Language.get("dashboard.below_reorder"), getItemsBelowReorderCount()));
+        statsRow.add(createStatCard(Language.get("dashboard.warehouses"), getCount("Warehouse")));
+        statsRow.add(createStatCard(Language.get("dashboard.users"), getCount("User")));
+        statsRow.add(createStatCard(Language.get("dashboard.pending"), getPendingOrderCount()));
 
 
 
@@ -64,13 +65,13 @@ public class MainPanel extends JPanel {
         middle.setPreferredSize(new Dimension(920, 250));
 
         middle.add(createItemWarehousePieChart());
-        middle.add(createTitledScrollTable("Items Below Reorder Level", getLowStockModel()));
+        middle.add(createTitledScrollTable(Language.get("dashboard.ibrl"), getLowStockModel()));
 
         // Bottom Content
         JPanel bottom = new JPanel(new GridLayout(1, 2, 15, 10));
         bottom.setPreferredSize(new Dimension(920, 200));
 
-        bottom.add(createTitledScrollTable("Recently Created Orders", getRecentOrdersModel()));
+        bottom.add(createTitledScrollTable(Language.get("dashboard.recent_orders"), getRecentOrdersModel()));
         bottom.add(createTopItemsBarChart());
 
 
@@ -150,12 +151,12 @@ public class MainPanel extends JPanel {
                 }
             }
             if (otherSum > 0) {
-                dataset.setValue("Other", otherSum);
+                dataset.setValue(Language.get("dashboard.other"), otherSum);
             }
 
         }
 
-        JFreeChart chart = ChartFactory.createPieChart("Item Distribution Across Warehouses", dataset, true, true, false);
+        JFreeChart chart = ChartFactory.createPieChart(Language.get("dashboard.idaw"), dataset, true, true, false);
         ((org.jfree.chart.plot.PiePlot) chart.getPlot()).setLabelFont(new Font("SansSerif", Font.PLAIN, 10));
         chart.getTitle().setFont(new Font("SansSerif", Font.BOLD, 12));
 
@@ -183,12 +184,12 @@ public class MainPanel extends JPanel {
                 String itemName = (String) row[0];
                 if (itemName.length() > 15) itemName = itemName.substring(0, 15) + "...";
                 Long quantity = (Long) row[1];
-                dataset.addValue(quantity, "Quantity", itemName);
+                dataset.addValue(quantity, Language.get("item.quantity"), itemName);
             }
         }
 
         JFreeChart chart = ChartFactory.createBarChart(
-                "Top 5 Stocked Items", "", "", dataset,
+                Language.get("dashboard.top5"), "", "", dataset,
                 org.jfree.chart.plot.PlotOrientation.VERTICAL, false, true, false);
 
         CategoryPlot plot = chart.getCategoryPlot();
@@ -217,7 +218,7 @@ public class MainPanel extends JPanel {
 
 
     private TableModel getLowStockModel() {
-        String[] cols = {"Warehouse", "Item", "Quantity", "Reorder Level"};
+        String[] cols = {Language.get("warehouse.name"), Language.get("item.item"), Language.get("item.quantity"), Language.get("item.reorder")};
         Object[][] data;
         try (org.hibernate.Session session = Database.getSessionFactory().openSession()) {
             Query<Object[]> query = session.createQuery(
@@ -244,7 +245,7 @@ public class MainPanel extends JPanel {
 
 
     private TableModel getRecentOrdersModel() {
-        String[] cols = {"Order ID", "Status", "Created At"};
+        String[] cols = {Language.get("order.id"), Language.get("order.status"), Language.get("order.created_at")};
         Object[][] data;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         try (org.hibernate.Session session = Database.getSessionFactory().openSession()) {
@@ -275,7 +276,7 @@ public class MainPanel extends JPanel {
         table.getTableHeader().setReorderingAllowed(false);
         table.setFillsViewportHeight(false); // Don't stretch it
 
-        if ("Reorder Level".equals(model.getColumnName(3))) {
+        if (Language.get("item.reorder").equals(model.getColumnName(3))) {
             table.getColumnModel().getColumn(0).setPreferredWidth(100); // Quantity
             table.getColumnModel().getColumn(1).setPreferredWidth(150); // Quantity
             table.getColumnModel().getColumn(2).setPreferredWidth(60); // Quantity

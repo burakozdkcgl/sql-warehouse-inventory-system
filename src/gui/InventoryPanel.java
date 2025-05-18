@@ -5,6 +5,7 @@ import entity.Inventory;
 import entity.Item;
 import entity.Warehouse;
 import jakarta.persistence.TypedQuery;
+import logic.Language;
 import org.hibernate.Session;
 
 import javax.swing.*;
@@ -36,7 +37,7 @@ public class InventoryPanel extends JPanel {
                 new EmptyBorder(20, 20, 20, 20)
         ));
 
-        JLabel title = new JLabel("Inventory Overview", SwingConstants.CENTER);
+        JLabel title = new JLabel(Language.get("inventory.title"), SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 22));
         title.setForeground(new Color(30, 30, 30));
         whiteBox.add(title, BorderLayout.NORTH);
@@ -63,7 +64,7 @@ public class InventoryPanel extends JPanel {
     private void buildSearchBar() {
         searchField = new JTextField();
         searchField.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        searchField.setToolTipText("Search item name or SKU...");
+        searchField.setToolTipText(Language.get("inventory.search_description"));
         searchField.getDocument().addDocumentListener(new DocumentListener() {
             public void insertUpdate(DocumentEvent e) { refreshTableOnly(); }
             public void removeUpdate(DocumentEvent e) { refreshTableOnly(); }
@@ -75,7 +76,7 @@ public class InventoryPanel extends JPanel {
         warehouseDisplayPanel.removeAll();
 
         if (warehouses == null || warehouses.isEmpty()) {
-            JLabel noWarehouseLabel = new JLabel("No warehouses found.", SwingConstants.CENTER);
+            JLabel noWarehouseLabel = new JLabel(Language.get("inventory.no_warehouse"), SwingConstants.CENTER);
             noWarehouseLabel.setFont(new Font("Segoe UI", Font.PLAIN, 16));
             JPanel centerPanel = new JPanel(new GridBagLayout());
             centerPanel.setOpaque(false);
@@ -99,7 +100,7 @@ public class InventoryPanel extends JPanel {
         Font labelFont = new Font("Segoe UI", Font.PLAIN, 14);
 
 
-        JLabel name = new JLabel("Warehouse: " + warehouse.getName());
+        JLabel name = new JLabel(Language.get("warehouse.name")+": " + warehouse.getName());
         name.setFont(labelFont);
         infoPanel.add(name);
         infoPanel.add(Box.createVerticalStrut(5));
@@ -108,7 +109,7 @@ public class InventoryPanel extends JPanel {
         location.setFont(labelFont);
         location.setAlignmentX(Component.CENTER_ALIGNMENT);
         if (warehouse.getLocation() != null && !warehouse.getLocation().trim().isEmpty()) {
-            location.setText("Location: " + warehouse.getLocation());
+            location.setText(Language.get("warehouse.location")+": " + warehouse.getLocation());
             location.setVisible(true);
         } else {
             location.setText(" ");
@@ -121,7 +122,7 @@ public class InventoryPanel extends JPanel {
         description.setFont(labelFont);
         description.setAlignmentX(Component.CENTER_ALIGNMENT);
         if (warehouse.getDescription() != null && !warehouse.getDescription().trim().isEmpty()) {
-            description.setText("Description: " + warehouse.getDescription());
+            description.setText(Language.get("warehouse.description")+": " + warehouse.getDescription());
             description.setVisible(true);
         } else {
             description.setText(" ");
@@ -139,8 +140,8 @@ public class InventoryPanel extends JPanel {
         // Navigation buttons
         JPanel navPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 5));
         navPanel.setOpaque(false);
-        JButton leftBtn = new JButton("← Previous");
-        JButton rightBtn = new JButton("Next →");
+        JButton leftBtn = new JButton("← "+Language.get("inventory.previous"));
+        JButton rightBtn = new JButton(Language.get("inventory.next")+" →");
         styleNavButton(leftBtn);
         styleNavButton(rightBtn);
         if (warehouses.size() > 1) {
@@ -160,7 +161,7 @@ public class InventoryPanel extends JPanel {
         // Search field
         JPanel searchPanel = new JPanel(new BorderLayout(10, 10));
         searchPanel.setOpaque(false);
-        searchPanel.add(new JLabel("Search: "), BorderLayout.WEST);
+        searchPanel.add(new JLabel(Language.get("inventory.search")+": "), BorderLayout.WEST);
         searchPanel.add(searchField, BorderLayout.CENTER);
 
         controlsPanel.add(navPanel);
@@ -202,7 +203,7 @@ public class InventoryPanel extends JPanel {
 
     private JTable createInventoryTable(Warehouse warehouse) {
         DefaultTableModel model = new DefaultTableModel(new Object[] {
-                "Category", "SKU", "Item Name", "Quantity", "Reorder Level"
+                Language.get("item.category"), Language.get("item.sku"), Language.get("item.name"), Language.get("item.quantity"), Language.get("item.reorder")
         }, 0);
 
         String filter = searchField.getText().trim().toLowerCase();

@@ -9,9 +9,11 @@ A desktop application for managing warehouses, inventory records, orders, and us
 ![ScreenShot](/screenshots/ss4.png)
 ![ScreenShot](/screenshots/ss5.png)
 ![ScreenShot](/screenshots/ss6.png)
+![ScreenShot](/screenshots/ss7.png)
 
 ## Features
 
-- **Custom Launcher**: Built-in GUI launcher that simplifies database setup and connection. Select your DBMS, fill in credentials, and launch—no manual config file change needed.
-- **Multi-Database Support**: Works with MySQL, PostgreSQL, SQL Server, and SQLite via Hibernate.
+- **Custom Launcher**: Built-in GUI launcher that simplifies database connection. Select your DBMS, fill in credentials, and launch—no manual config file change needed.
+- **Multi-DBMS Support**: Works with MySQL, PostgreSQL, SQL Server, and SQLite via Hibernate.
 - **Role-Based Interface**: UI and features are dynamically tailored according to the user's assigned role.
+- **Multi-Language Support**: Currently supports English and Turkish.

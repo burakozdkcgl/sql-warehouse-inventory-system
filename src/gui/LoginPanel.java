@@ -7,10 +7,13 @@ import java.awt.event.ActionEvent;
 import entity.User;
 import logic.App;
 import db.Auth;
+import logic.Language;
 import logic.NotificationPanel;
 import logic.Session;
 
 public class LoginPanel extends JPanel {
+
+    JButton loginButton;
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -72,20 +75,20 @@ public class LoginPanel extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
 
         // Username and Password Fields
-        formPanel.add(createLabel("Username:"), gbc);
+        formPanel.add(createLabel(Language.get("launcher.username")), gbc);
         gbc.gridx = 1;
         JTextField idField = new JTextField(12);
         formPanel.add(idField, gbc);
 
         gbc.gridx = 2;
-        formPanel.add(createLabel("Password:"), gbc);
+        formPanel.add(createLabel(Language.get("launcher.password")), gbc);
         gbc.gridx = 3;
         JPasswordField passField = new JPasswordField(12);
         formPanel.add(passField, gbc);
 
         // Login Button
         gbc.gridx = 4;
-        JButton loginButton = new JButton("Login");
+        loginButton = new JButton(Language.get("login.login"));
         styleButton(loginButton);
         formPanel.add(loginButton, gbc);
 
@@ -96,9 +99,11 @@ public class LoginPanel extends JPanel {
             if (user != null) {
                 Session.getInstance().setCurrentUser(user);
                 App.getInstance().setScreen(new MainPanel());
-                NotificationPanel.show(App.getInstance().getLayeredPane(), "Login successful!", 3000, "green");
+                String info = Language.get("login.success");
+                NotificationPanel.show(App.getInstance().getLayeredPane(), info, 3000, "green");
             } else {
-                NotificationPanel.show(App.getInstance().getLayeredPane(), "Invalid credentials!", 3000, "red");
+                String info = Language.get("login.failed");
+                NotificationPanel.show(App.getInstance().getLayeredPane(), info, 3000, "red");
 
             }
 

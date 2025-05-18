@@ -1,5 +1,4 @@
 {
-
   "launcher": {
     "language": "Dil: Türkçe",
     "fullscreen": "Tam Ekran",
@@ -20,6 +19,70 @@
     "sqlite_file_missing": "SQLite dosyası bulunamadı: ",
     "config_saved": "Yapılandırma kaydedildi: ",
     "launch_failed": "Uygulama başlatılamadı. Bağlantıyı kontrol edin."
+  },
+  "login": {
+    "username": "Kullanıcı adı:",
+    "password": "Şifre:",
+    "login": "Giriş",
+    "success": "Giriş Başarılı!",
+    "failed": "Hatalı Giriş!"
+  },
+  "nav": {
+    "dashboard": "Panel",
+    "manage": "Yönetim",
+    "orders": "Siparişler",
+    "inventory": "Envanter",
+    "item_list": "Ürün Listesi",
+    "user_list": "Kullanıcılar",
+    "settings": "Ayarlar"
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "toggle": "Tam Ekranı Aç/Kapat",
+    "my_profile": "Profilim",
+    "logout": "Hesaptan Çıkış",
+    "exit": "Uygulamadan Çıkış"
+  },
+  "item": {
+    "name": "Ürün ismi",
+    "quantity": "Adet",
+    "reorder": "Uyarı seviyesi",
+    "sku": "SKU",
+    "category": "Kategori",
+    "description": "Açıklama",
+    "list": "Ürün Listesi",
+    "item": "Ürün"
+  },
+  "warehouse": {
+    "name": "Depo",
+    "location": "Konum",
+    "description": "Açıklama"
+  },
+  "inventory": {
+    "title": "Envanter",
+    "previous": "Önceki",
+    "next": "Sonraki",
+    "search": "Ara",
+    "search_description": "SKU veya ürün ismi ile ara",
+    "no_warehouse": "Depo bulunamadı."
+  },
+  "dashboard": {
+    "welcome": "Hoşgeldin",
+    "idaw": "Depolara Göre Ürün Dağılımı",
+    "top5": "En Fazla Stoklanan 5 Ürün",
+    "ibrl": "Uyarı Seviyesinin Altındaki Ürünler",
+    "recent_orders": "Yeni Oluşturulan Siparişler",
+    "item_types": "Ürün Türleri",
+    "below_reorder": "Uyarı Seviyesinde",
+    "warehouses": "Depolar",
+    "users": "Kullanıcılar",
+    "pending": "Bekleyen Siparişler",
+    "other": "Diğer"
+  },
+  "order": {
+    "id": "Sipariş Numarası",
+    "created_at": "Oluşturulma zamanı",
+    "status": "Durum"
   }
 
 }

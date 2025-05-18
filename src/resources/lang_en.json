@@ -19,8 +19,69 @@
     "sqlite_file_missing": "SQLite file does not exist: ",
     "config_saved": "Configuration saved for ",
     "launch_failed": "Failed to launch application. Check connection."
+  },
+  "login": {
+    "username": "Username:",
+    "password": "Password:",
+    "login": "Login",
+    "success": "Login successful!",
+    "failed": "Invalid credentials!"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "manage": "Manage",
+    "orders": "Orders",
+    "inventory": "Inventory",
+    "item_list": "Item List",
+    "user_list": "User List",
+    "settings": "Settings"
+  },
+  "settings": {
+    "title": "Settings",
+    "toggle": "Toggle Fullscreen",
+    "my_profile": "My Profile",
+    "logout": "Logout",
+    "exit": "Exit App"
+  },
+  "item": {
+    "name": "Item name",
+    "quantity": "Quantity",
+    "reorder": "Reorder level",
+    "sku": "SKU",
+    "category": "Category",
+    "description": "Description",
+    "list": "Item List",
+    "item": "Item"
+  },
+  "warehouse": {
+    "name": "Warehouse",
+    "location": "Location",
+    "description": "Description"
+  },
+  "inventory": {
+    "title": "Inventory Overview",
+    "previous": "Previous",
+    "next": "Next",
+    "search": "Search",
+    "search_description": "Search by SKU or item name",
+    "no_warehouse": "No warehouses were found."
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "idaw": "Item Distribution Across Warehouses",
+    "top5": "Top 5 Stocked Items",
+    "ibrl": "Items Below Reorder Level",
+    "recent_orders": "Recently Created Orders",
+    "item_types": "Item Types",
+    "below_reorder": "Below Reorder",
+    "warehouses": "Warehouses",
+    "users": "Users",
+    "pending": "Pending Orders",
+    "other": "Other"
+  },
+  "order": {
+    "id": "Order ID",
+    "created_at": "Created at",
+    "status": "Status"
   }
-}
-
-
 }

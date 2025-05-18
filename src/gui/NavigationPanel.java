@@ -1,6 +1,7 @@
 package gui;
 
 import logic.App;
+import logic.Language;
 import logic.Session;
 
 import javax.swing.*;
@@ -34,13 +35,13 @@ public class NavigationPanel extends JPanel {
         navContainer.setMaximumSize(new Dimension(920, 60)); // This keeps the nav bar narrow
         navContainer.setAlignmentX(Component.CENTER_ALIGNMENT); // Center it horizontally
 
-        navContainer.add(createNavButton("Dashboard", () ->
+        navContainer.add(createNavButton(Language.get("nav.dashboard"), () ->
                 App.getInstance().setScreen(new MainPanel())));
 
         if  (Objects.equals(Session.getInstance().getCurrentUser().getRole(), "admin") ||
                 Objects.equals(Session.getInstance().getCurrentUser().getRole(), "manager")
         ){
-            navContainer.add(createNavButton("Manage", () ->
+            navContainer.add(createNavButton(Language.get("nav.manage"), () ->
                     App.getInstance().setScreen(new ManagePanel())));
         }
 
@@ -48,22 +49,22 @@ public class NavigationPanel extends JPanel {
                 Objects.equals(Session.getInstance().getCurrentUser().getRole(), "manager") ||
             Objects.equals(Session.getInstance().getCurrentUser().getRole(), "employee")
         ){
-            navContainer.add(createNavButton("Orders", () ->
+            navContainer.add(createNavButton(Language.get("nav.orders"), () ->
                     App.getInstance().setScreen(new OrderPanel())));
         }
 
 
 
-        navContainer.add(createNavButton("Inventory", () ->
+        navContainer.add(createNavButton(Language.get("nav.inventory"), () ->
                 App.getInstance().setScreen(new InventoryPanel())));
 
-        navContainer.add(createNavButton("Item List", () ->
+        navContainer.add(createNavButton(Language.get("nav.item_list"), () ->
                 App.getInstance().setScreen(new ItemListPanel())));
 
-        navContainer.add(createNavButton("User List", () ->
+        navContainer.add(createNavButton(Language.get("nav.user_list"), () ->
                 App.getInstance().setScreen(new UserListPanel())));
 
-        navContainer.add(createNavButton("Settings", () ->
+        navContainer.add(createNavButton(Language.get("nav.settings"), () ->
                 App.getInstance().setScreen(new SettingsPanel())));
 
 

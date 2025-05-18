@@ -3,6 +3,7 @@ package gui;
 import db.Database;
 import entity.Item;
 import logic.App;
+import logic.Language;
 import logic.NotificationPanel;
 import org.hibernate.Session;
 
@@ -30,7 +31,7 @@ public class ItemListPanel extends JPanel {
         ));
         whiteBox.setPreferredSize(new Dimension(950, 620));
 
-        JLabel title = new JLabel("Item List", SwingConstants.CENTER);
+        JLabel title = new JLabel(Language.get("item.list"), SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 22));
         title.setForeground(new Color(40, 40, 40));
         whiteBox.add(title, BorderLayout.NORTH);
@@ -84,7 +85,7 @@ public class ItemListPanel extends JPanel {
 
 
     private JTable createStyledTable() {
-        String[] columns = {"SKU", "Name", "Description"};
+        String[] columns = {Language.get("item.sku"), Language.get("item.name"), Language.get("item.description")};
         DefaultTableModel model = new DefaultTableModel(columns, 0) {
             @Override public boolean isCellEditable(int row, int col) { return false; }
         };
