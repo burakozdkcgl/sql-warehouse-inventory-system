@@ -89,6 +89,7 @@
     "approved": "Onaylandı",
     "cancel": "İptal et",
     "canceled": "İptal edildi",
+    "pending": "Beklemede",
     "order": "Sipariş",
     "success": "Sipariş Oluşturuldu!",
     "fail": "Sipariş Oluşturulamadı!",

@@ -250,13 +250,13 @@ public class MainPanel extends JPanel {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         try (org.hibernate.Session session = Database.getSessionFactory().openSession()) {
             Query<Object[]> query = session.createQuery(
-                    "SELECT o.id, o.status, o.createdAt FROM Order o ORDER BY o.createdAt DESC", Object[].class);
+                    "SELECT o.id, o.status, o.createdAt FROM Order o ORDER BY o.id DESC", Object[].class);
             List<Object[]> resultList = query.setMaxResults(5).list();
             data = new Object[resultList.size()][3];
             for (int i = 0; i < resultList.size(); i++) {
                 Object[] row = resultList.get(i);
                 data[i][0] = row[0]; // id
-                data[i][1] = row[1]; // status
+                data[i][1] = Language.get("order." + row[1].toString().toLowerCase());
                 data[i][2] = ((LocalDateTime) row[2]).format(formatter); // formatted createdAt
             }
         }
