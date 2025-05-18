@@ -6,6 +6,7 @@ public class Session {
 
     private static Session instance;
     private User currentUser;
+    private String language;
     private boolean isFullscreen;
 
     public static Session getInstance() {
@@ -32,4 +33,10 @@ public class Session {
         return isFullscreen;
     }
 
+    public void setLanguage(String language){
+        this.language = language;
+        Language.load(language);
+    }
+
+    public String getLanguage(){return language;}
 }

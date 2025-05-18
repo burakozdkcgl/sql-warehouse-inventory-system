@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.net.URL;
+import java.util.Objects;
 
 public class Launcher extends JFrame {
 
@@ -15,6 +16,9 @@ public class Launcher extends JFrame {
 
     private boolean isFullscreen = true;
 
+    private JButton langBtn, fullscreenBtn, configBtn, startBtn, backBtn;
+
+
     private static final String[] DBMS_OPTIONS = {"MySQL", "PostgreSQL", "SQLServer", "SQLite"};
     private static final String[] LOGO_PATHS = {
             "/mysql_logo.png", "/postgresql_logo.png", "/sqlserver_logo.png", "/sqlite_logo.png"
@@ -22,6 +26,10 @@ public class Launcher extends JFrame {
 
     public Launcher() {
         new Session();
+        Session.getInstance().setLanguage("en");
+        Language.addListener(this::reloadTexts); // hook to language change
+
+
         setTitle("Warehouse Inventory System");
         setSize(400, 540); // <-- enforce size
         setLocationRelativeTo(null); // <-- center it here
@@ -36,6 +44,7 @@ public class Launcher extends JFrame {
         dbFormPanel = new JPanel(new BorderLayout());
         cardPanel.add(dbFormPanel, "DBMSForm");
 
+        reloadTexts(); // <-- initialize labels on startup
         add(cardPanel);
         setVisible(true);
     }
@@ -58,13 +67,16 @@ public class Launcher extends JFrame {
         topPanel.add(logoLabel);
         topPanel.add(Box.createVerticalStrut(10));
 
-        JButton fullscreenBtn = createStyledButton("Fullscreen: Enabled");
+        langBtn = createStyledButton("");
+        langBtn.addActionListener(e -> toggleLanguage());
+
+        fullscreenBtn = createStyledButton("");
         fullscreenBtn.addActionListener(e -> toggleFullscreen(fullscreenBtn));
 
-        JButton configBtn = createStyledButton("Configure Database");
+        configBtn = createStyledButton("");
         configBtn.addActionListener(e -> cardLayout.show(cardPanel, "DBMSSelection"));
 
-        JButton startBtn = createStyledButton("Start Application");
+        startBtn = createStyledButton("");
         startBtn.addActionListener(e -> {
             ConfigManager.loadConfig();
             if("SQLite".equalsIgnoreCase(ConfigManager.getDBMS())){
@@ -84,6 +96,8 @@ public class Launcher extends JFrame {
 
         JPanel buttonsPanel = new JPanel();
         buttonsPanel.setLayout(new BoxLayout(buttonsPanel, BoxLayout.Y_AXIS));
+        buttonsPanel.add(langBtn);
+        buttonsPanel.add(Box.createVerticalStrut(10));
         buttonsPanel.add(fullscreenBtn);
         buttonsPanel.add(Box.createVerticalStrut(10));
         buttonsPanel.add(configBtn);
@@ -169,7 +183,7 @@ public class Launcher extends JFrame {
             if (++gridX > 1) { gridX = 0; gridY++; }
         }
 
-        JButton backBtn = createStyledButton("Back");
+        backBtn = createStyledButton(Language.get("launcher.back"));
         backBtn.addActionListener(e -> cardLayout.show(cardPanel, "Launcher"));
 
         JPanel southPanel = new JPanel();
@@ -214,16 +228,17 @@ public class Launcher extends JFrame {
         statusLabel.setForeground(Color.RED);
         statusLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JButton browseButton = createStyledButton("Browse");
-        JButton saveBtn = createStyledButton("Save Configuration");
-        JButton launchBtn = createStyledButton("Launch Without Saving");
-        JButton backBtn = createStyledButton("Back");
+        JButton browseButton = createStyledButton(Language.get("launcher.browse"));
+        JButton saveBtn = createStyledButton(Language.get("launcher.save_configuration"));
+        JButton launchBtn = createStyledButton(Language.get("launcher.launch_without_saving"));
+        JButton backBtn = createStyledButton(Language.get("launcher.back"));
+
 
         if (!isSQLite) {
-            hostField = addFormRow("Host:", "localhost", DBpanel);
-            portField = addFormRow("Port:", getDefaultPort(dbms), DBpanel);
-            dbField = addFormRow("Database Name:", "warehouse_db", DBpanel);
-            userField = addFormRow("Username:", "root", DBpanel);
+            hostField = addFormRow(Language.get("launcher.host"), "localhost", DBpanel);
+            portField = addFormRow(Language.get("launcher.port"), getDefaultPort(dbms), DBpanel);
+            dbField = addFormRow(Language.get("launcher.database_name"), "warehouse_db", DBpanel);
+            userField = addFormRow(Language.get("launcher.username"), "root", DBpanel);
             passField = addPasswordRow(DBpanel);
             saveBtn.addActionListener(e -> {
                 ConfigManager.fillConfig(dbms, hostField.getText(), portField.getText(), dbField.getText(), userField.getText(), passField.getText());
@@ -241,7 +256,7 @@ public class Launcher extends JFrame {
             });
         } else {
 
-            dbField = addFormRow("Database File:", "warehouse_db.sqlite", DBpanel);
+            dbField = addFormRow(Language.get("launcher.database_file"), "warehouse_db.sqlite", DBpanel);
             saveBtn.addActionListener(e -> {
                 String dbPath = dbField.getText();
                 File sqliteFile = new File(dbPath);
@@ -364,7 +379,7 @@ public class Launcher extends JFrame {
         JPanel row = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
 
-        JLabel jLabel = new JLabel("Password:");
+        JLabel jLabel = new JLabel(Language.get("launcher.password"));
         jLabel.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         jLabel.setPreferredSize(new Dimension(120, 25));
 
@@ -388,8 +403,15 @@ public class Launcher extends JFrame {
 
     private void toggleFullscreen(JButton button) {
         isFullscreen = !isFullscreen;
-        button.setText("Fullscreen: " + (isFullscreen ? "Enabled" : "Disabled"));
+        reloadTexts();
     }
+
+    private void toggleLanguage() {
+        String current = Language.getCurrentLanguage();
+        String newLang = current.equals("en") ? "tr" : "en";
+        Session.getInstance().setLanguage(newLang); // this also triggers reloadTexts()
+    }
+
 
     private void showError(JLabel statusLabel, String message) {
         statusLabel.setText(message);
@@ -416,4 +438,14 @@ public class Launcher extends JFrame {
             default -> "";
         };
     }
+
+    private void reloadTexts() {
+        langBtn.setText(Language.get("launcher.language"));
+        fullscreenBtn.setText(Language.get("launcher.fullscreen") +": "+ (isFullscreen ? Language.get("launcher.enabled") : Language.get("launcher.disabled")));
+        configBtn.setText(Language.get("launcher.configure_database"));
+        startBtn.setText(Language.get("launcher.start_application"));
+        backBtn.setText(Language.get("launcher.back"));
+    }
+
+
 }

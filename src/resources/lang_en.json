@@ -1,0 +1,26 @@
+{
+  "launcher": {
+    "language": "Language: English",
+    "fullscreen": "Fullscreen",
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "configure_database": "Configure Database",
+    "start_application": "Start Application",
+    "back": "Back",
+    "browse": "Browse",
+    "save_configuration": "Save Configuration",
+    "launch_without_saving": "Launch Without Saving",
+    "host": "Host:",
+    "port": "Port:",
+    "database_name": "Database Name:",
+    "username": "Username:",
+    "password": "Password:",
+    "database_file": "Database File:",
+    "sqlite_file_missing": "SQLite file does not exist: ",
+    "config_saved": "Configuration saved for ",
+    "launch_failed": "Failed to launch application. Check connection."
+  }
+}
+
+
+}

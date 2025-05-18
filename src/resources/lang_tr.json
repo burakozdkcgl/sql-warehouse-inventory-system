@@ -1,0 +1,25 @@
+{
+
+  "launcher": {
+    "language": "Dil: Türkçe",
+    "fullscreen": "Tam Ekran",
+    "enabled": "Açık",
+    "disabled": "Kapalı",
+    "configure_database": "Veritabanını Yapılandır",
+    "start_application": "Uygulamayı Başlat",
+    "back": "Geri",
+    "browse": "Gözat",
+    "save_configuration": "Yapılandırmayı Kaydet",
+    "launch_without_saving": "Kaydetmeden Başlat",
+    "host": "Sunucu:",
+    "port": "Port:",
+    "database_name": "Veritabanı Adı:",
+    "username": "Kullanıcı Adı:",
+    "password": "Şifre:",
+    "database_file": "Veritabanı Dosyası:",
+    "sqlite_file_missing": "SQLite dosyası bulunamadı: ",
+    "config_saved": "Yapılandırma kaydedildi: ",
+    "launch_failed": "Uygulama başlatılamadı. Bağlantıyı kontrol edin."
+  }
+
+}
